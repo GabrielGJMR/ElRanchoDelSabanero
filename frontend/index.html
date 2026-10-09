@@ -20,7 +20,7 @@
 
   <main id="menu" class="wrap">
     <p class="note">Elija 2 acompañamientos: ensalada criolla, arroz blanco, papas fritas, patacones, yuca frita, vegetales salteados o papas mini.</p>
-    <div id="sections"></div>
+    <div id="sections"><p class="note">Cargando menú...</p></div>
     <p class="note small">Los precios no incluyen I.V.A.</p>
   </main>
 
@@ -31,22 +31,6 @@
     <p><a href="https://instagram.com/elrancho_del_sabanero2023" target="_blank" rel="noopener">@elrancho_del_sabanero2023</a> ·
        <a href="https://www.facebook.com/OkisGrillHouse/" target="_blank" rel="noopener">Facebook</a></p>
   </section>
-
-  <button id="cartBtn" class="cart-btn" hidden>Ver pedido (<span id="cartCount">0</span>) · <span id="cartTotal"></span></button>
-
-  <dialog id="cartDlg">
-    <form method="dialog" class="close-row"><button aria-label="Cerrar">✕</button></form>
-    <h2>Su pedido</h2>
-    <ul id="cartList" class="cart-list"></ul>
-    <p class="total">Total (sin I.V.A.): <strong id="cartSum"></strong></p>
-    <form id="orderForm">
-      <label>Nombre <input name="customer" required maxlength="80" autocomplete="name"></label>
-      <label>Teléfono <input name="phone" required maxlength="20" inputmode="tel" autocomplete="tel"></label>
-      <label>Notas (acompañamientos, sin cebolla, etc.) <textarea name="notes" maxlength="500" rows="3"></textarea></label>
-      <button class="btn" type="submit">Enviar pedido por WhatsApp</button>
-      <p id="orderMsg" class="note small" role="status"></p>
-    </form>
-  </dialog>
 
   <script src="app.js"></script>
 </body>

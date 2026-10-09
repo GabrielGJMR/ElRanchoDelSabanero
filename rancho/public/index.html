@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>El Rancho del Sabanero | Liberia, Costa Rica</title>
+  <meta name="description" content="Restaurante de comida artesanal en Liberia, Costa Rica. Nuestra especialidad es hacerlos felices.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Playball&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="hero">
+    <h1 class="script">Rancho del Sabanero</h1>
+    <p class="tagline">Nuestra especialidad es hacerlos felices.</p>
+    <a class="btn" href="#menu">Ver el menú</a>
+  </header>
+
+  <nav id="tabs" class="tabs" aria-label="Categorías del menú"></nav>
+
+  <main id="menu" class="wrap">
+    <p class="note">Elija 2 acompañamientos: ensalada criolla, arroz blanco, papas fritas, patacones, yuca frita, vegetales salteados o papas mini.</p>
+    <div id="sections"></div>
+    <p class="note small">Los precios no incluyen I.V.A.</p>
+  </main>
+
+  <section class="wrap info" id="contacto">
+    <h2>Visítenos</h2>
+    <p>Liberia, Guanacaste, Costa Rica</p>
+    <p>Tel: <a href="tel:+50663837649">6383 7649</a></p>
+    <p><a href="https://instagram.com/elrancho_del_sabanero2023" target="_blank" rel="noopener">@elrancho_del_sabanero2023</a> ·
+       <a href="https://www.facebook.com/OkisGrillHouse/" target="_blank" rel="noopener">Facebook</a></p>
+  </section>
+
+  <button id="cartBtn" class="cart-btn" hidden>Ver pedido (<span id="cartCount">0</span>) · <span id="cartTotal"></span></button>
+
+  <dialog id="cartDlg">
+    <form method="dialog" class="close-row"><button aria-label="Cerrar">✕</button></form>
+    <h2>Su pedido</h2>
+    <ul id="cartList" class="cart-list"></ul>
+    <p class="total">Total (sin I.V.A.): <strong id="cartSum"></strong></p>
+    <form id="orderForm">
+      <label>Nombre <input name="customer" required maxlength="80" autocomplete="name"></label>
+      <label>Teléfono <input name="phone" required maxlength="20" inputmode="tel" autocomplete="tel"></label>
+      <label>Notas (acompañamientos, sin cebolla, etc.) <textarea name="notes" maxlength="500" rows="3"></textarea></label>
+      <button class="btn" type="submit">Enviar pedido por WhatsApp</button>
+      <p id="orderMsg" class="note small" role="status"></p>
+    </form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>

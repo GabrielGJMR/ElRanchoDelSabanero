@@ -55,34 +55,9 @@ section.cat .catnote { color: var(--muted); font-size: .85rem; margin: 0 0 8px; 
 .item .name { flex: 1; font-weight: 700; }
 .item .desc { display: block; font-weight: 400; color: var(--muted); font-size: .82rem; }
 .price { color: var(--gold); font-weight: 700; white-space: nowrap; }
-.add {
-  width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--fire);
-  background: transparent; color: var(--fire); font-size: 1.3rem; cursor: pointer; line-height: 1;
-}
-.add:hover { background: var(--fire); color: #fff; }
-
-.info { text-align: center; border-top: 1px solid #2c221c; margin-top: 32px; padding-bottom: 96px; }
+.info { text-align: center; border-top: 1px solid #2c221c; margin-top: 32px; padding-bottom: 48px; }
 .info h2 { color: var(--gold); }
 
-.cart-btn {
-  position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 10;
-  background: var(--fire); color: #fff; border: 0; border-radius: 999px; padding: 14px 24px;
-  font: 700 .95rem 'Merriweather', serif; cursor: pointer; box-shadow: 0 6px 24px rgba(0, 0, 0, .5);
-}
-
-dialog {
-  width: min(520px, 94vw); max-height: 92vh; background: var(--card); color: var(--text);
-  border: 1px solid #3a2d25; border-radius: 14px; padding: 20px;
-}
-dialog::backdrop { background: rgba(0, 0, 0, .7); }
-.close-row { text-align: right; margin: 0; }
-.close-row button { background: none; border: 0; color: var(--muted); font-size: 1.2rem; cursor: pointer; }
-dialog h2 { margin: 0 0 12px; color: var(--gold); }
-.cart-list { list-style: none; padding: 0; margin: 0 0 12px; }
-.cart-list li { display: flex; gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px solid #2c221c; }
-.cart-list .n { flex: 1; }
-.cart-list button { width: 28px; height: 28px; border-radius: 50%; border: 1px solid #3a2d25; background: none; color: var(--text); cursor: pointer; }
-.total { text-align: right; }
 label { display: block; margin: 10px 0; font-size: .85rem; color: var(--muted); }
 input, textarea, select {
   display: block; width: 100%; margin-top: 4px; padding: 10px; border-radius: 8px;
@@ -92,10 +67,20 @@ form .btn { width: 100%; margin-top: 8px; }
 
 /* Admin */
 .admin h1 { color: var(--gold); }
-.admin .row { display: grid; grid-template-columns: 1fr 100px auto auto; gap: 8px; align-items: center; margin: 6px 0; }
-.admin .row input[type=checkbox] { width: auto; margin: 0; }
+.admin h3 { color: var(--gold); margin: 28px 0 6px; }
+.admin .wrap { max-width: 960px; }
+.admin .row { display: grid; gap: 8px; align-items: center; margin: 6px 0; }
+.admin .cat-row { grid-template-columns: 1fr 1fr auto auto; margin-top: 28px; }
+.admin .item-row { grid-template-columns: 1.2fr 1.4fr 110px auto auto auto; }
+.admin .item-row.new { grid-template-columns: 1.2fr 1.4fr 110px auto; }
+.admin .row input { margin: 0; }
+.admin .row input[type=checkbox] { display: inline-block; width: auto; }
+.admin label { margin: 0; white-space: nowrap; }
+.admin .row input { margin-top: 0; }
+.admin #login { max-width: 360px; }
+.admin #panel .btn, .admin .row .btn { width: auto; margin-top: 0; }
 .admin .btn.sm { padding: 6px 14px; font-size: .8rem; }
-.admin .order { background: var(--card); border-radius: 10px; padding: 12px 14px; margin: 10px 0; }
-.admin .order h3 { margin: 0 0 4px; font-size: 1rem; }
-.admin .order ul { margin: 6px 0; padding-left: 18px; }
-@media (max-width: 560px) { .admin .row { grid-template-columns: 1fr 90px; } }
+@media (max-width: 760px) {
+  .admin .cat-row, .admin .item-row, .admin .item-row.new { grid-template-columns: 1fr 1fr; }
+}
+.admin #login label { margin: 10px 0; white-space: normal; }
