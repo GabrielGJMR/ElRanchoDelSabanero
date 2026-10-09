@@ -2,19 +2,26 @@ import { useEffect, useState } from 'react'
 import { fetchMenu, type Category } from '../api.ts'
 import PageHeader from '../components/PageHeader.tsx'
 import PhotoFrame from '../components/PhotoFrame.tsx'
-import { colones } from '../format.ts'
+import { colones, normalize } from '../format.ts'
 import { usePageTitle } from '../usePageTitle.ts'
 
 export default function MenuPage() {
   usePageTitle('La carta')
   const [menu, setMenu] = useState<Category[] | null>(null)
   const [failed, setFailed] = useState(false)
+  const [query, setQuery] = useState('')
 
   useEffect(() => {
     fetchMenu().then(setMenu).catch(() => setFailed(true))
   }, [])
 
-  const categories = (menu ?? []).filter((c) => c.items.length > 0)
+  const q = normalize(query)
+  const categories = (menu ?? [])
+    .map((c) => ({
+      ...c,
+      items: q ? c.items.filter((it) => normalize(it.name).includes(q) || normalize(it.description ?? '').includes(q)) : c.items,
+    }))
+    .filter((c) => c.items.length > 0)
 
   return (
     <>
@@ -25,25 +32,50 @@ export default function MenuPage() {
 
       <div className="paper min-h-[60vh]">
         <div className="sticky top-[65px] z-10 border-b border-paper-line bg-paper/95 backdrop-blur">
-          <div
-            className="mx-auto flex max-w-3xl gap-2 overflow-x-auto px-4 py-2.5 sm:justify-center"
-            aria-label="Categorías de la carta"
-          >
-            {categories.map((c) => (
-              <a
-                key={c.id}
-                href={`#cat${c.id}`}
-                className="inline-flex min-h-9 items-center rounded-sm border border-paper-line px-3.5 text-sm font-semibold whitespace-nowrap text-paper-ink no-underline hover:border-brasa hover:text-brasa"
+          <div className="mx-auto max-w-3xl px-4 py-2.5">
+            <div className="relative">
+              <svg
+                viewBox="0 0 20 20" fill="none" aria-hidden="true"
+                className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-paper-muted"
               >
-                {c.name}
-              </a>
-            ))}
+                <circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth={2} />
+                <path d="M14 14l4 4" stroke="currentColor" strokeWidth={2} strokeLinecap="round" />
+              </svg>
+              <input
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Buscar en la carta (ej. pollo, patacones)"
+                aria-label="Buscar platillos"
+                className="min-h-9 w-full rounded-sm border border-paper-line bg-paper-2/60 py-1.5 pr-3 pl-9 text-sm text-paper-ink placeholder:text-paper-muted focus-visible:outline-none"
+              />
+            </div>
+
+            {!q && (
+              <div
+                className="mt-2 flex gap-2 overflow-x-auto sm:justify-center"
+                aria-label="Categorías de la carta"
+              >
+                {categories.map((c) => (
+                  <a
+                    key={c.id}
+                    href={`#cat${c.id}`}
+                    className="inline-flex min-h-9 items-center rounded-sm border border-paper-line px-3.5 text-sm font-semibold whitespace-nowrap text-paper-ink no-underline hover:border-brasa hover:text-brasa"
+                  >
+                    {c.name}
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
         <div className="mx-auto max-w-3xl px-4 pt-6 pb-16">
           {failed && <p className="py-10 text-center text-paper-muted">No se pudo cargar la carta. Intente de nuevo en unos minutos.</p>}
           {!menu && !failed && <p className="py-10 text-center text-paper-muted">Cargando la carta...</p>}
+          {menu && !failed && q && categories.length === 0 && (
+            <p className="py-10 text-center text-paper-muted">No encontramos nada con "{query}".</p>
+          )}
 
           {categories.map((c) => (
             <section key={c.id} id={`cat${c.id}`} className="mt-10 scroll-mt-36">

@@ -6,6 +6,7 @@ import {
 import Brand from '../components/Brand.tsx'
 import CategoryEditor from '../components/CategoryEditor.tsx'
 import GalleryEditor from '../components/GalleryEditor.tsx'
+import { normalize } from '../format.ts'
 import { resizeImage } from '../image.ts'
 import LoginForm from '../components/LoginForm.tsx'
 import Toast from '../components/Toast.tsx'
@@ -23,12 +24,15 @@ export default function Admin() {
   const [tab, setTab] = useState<Tab>('menu')
   const [addingCategory, setAddingCategory] = useState(false)
   const [newCategory, setNewCategory] = useState({ name: '', note: '' })
+  const [query, setQuery] = useState('')
+  const [openCategories, setOpenCategories] = useState<Set<number> | null>(null)
 
   const logout = useCallback(() => {
     sessionStorage.removeItem(STORAGE_KEY)
     setAuth('')
     setMenu(null)
     setGallery(null)
+    setOpenCategories(null)
   }, [])
 
   const load = useCallback(async () => {
@@ -39,6 +43,8 @@ export default function Admin() {
       ])
       setMenu(menuData)
       setGallery(galleryData)
+      // Solo la primera vez que carga: abre la primera categoría y deja las demás como están.
+      setOpenCategories((prev) => prev ?? new Set(menuData[0] ? [menuData[0].id] : []))
     } catch (e) {
       if (e instanceof UnauthorizedError) logout()
       else setError((e as Error).message)
@@ -121,6 +127,24 @@ export default function Admin() {
 
   const itemCount = menu?.reduce((n, c) => n + c.items.length, 0) ?? 0
 
+  const toggleCategory = (id: number) =>
+    setOpenCategories((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+
+  const q = normalize(query)
+  const visibleCategories = (menu ?? []).flatMap((c) => {
+    if (!q) return [{ category: c, items: c.items }]
+    const categoryMatches = normalize(c.name).includes(q)
+    const items = categoryMatches ? c.items : c.items.filter(
+      (it) => normalize(it.name).includes(q) || normalize(it.description ?? '').includes(q),
+    )
+    return categoryMatches || items.length > 0 ? [{ category: c, items }] : []
+  })
+
   return (
     <main className="mx-auto max-w-5xl px-4 py-6">
       <div className="mb-5 flex items-center justify-between border-b border-line-soft pb-4">
@@ -163,11 +187,37 @@ export default function Admin() {
             <div role="tabpanel">
               {!menu && <p className="text-sm text-muted">Cargando...</p>}
 
-              {menu?.map((c, i) => (
+              {menu && menu.length > 0 && (
+                <div className="relative mb-4">
+                  <svg
+                    viewBox="0 0 20 20" fill="none" aria-hidden="true"
+                    className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted"
+                  >
+                    <circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth={2} />
+                    <path d="M14 14l4 4" stroke="currentColor" strokeWidth={2} strokeLinecap="round" />
+                  </svg>
+                  <input
+                    type="search"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Buscar categoría o platillo..."
+                    aria-label="Buscar en el menú"
+                    className="field pl-9"
+                  />
+                </div>
+              )}
+
+              {menu && q && visibleCategories.length === 0 && (
+                <p className="text-sm text-muted italic">No encontramos nada con "{query}".</p>
+              )}
+
+              {visibleCategories.map(({ category: c, items }) => (
                 <CategoryEditor
                   key={c.id}
                   category={c}
-                  defaultOpen={i === 0}
+                  items={items}
+                  open={q ? true : (openCategories?.has(c.id) ?? false)}
+                  onToggle={() => toggleCategory(c.id)}
                   onSaveCategory={saveCategory}
                   onDeleteCategory={deleteCategory}
                   onSaveItem={saveItem}

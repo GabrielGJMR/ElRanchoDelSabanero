@@ -4,7 +4,10 @@ import ItemRow from './ItemRow.tsx'
 
 interface Props {
   category: Category
-  defaultOpen?: boolean
+  /** Platillos a mostrar (ya filtrados); por defecto todos los de la categoría. */
+  items?: MenuItem[]
+  open: boolean
+  onToggle: () => void
   onSaveCategory: (id: number, data: CategoryInput) => Promise<boolean>
   onDeleteCategory: (category: Category) => Promise<void>
   onSaveItem: (id: number, data: ItemInput) => Promise<boolean>
@@ -15,11 +18,10 @@ interface Props {
 }
 
 export default function CategoryEditor({
-  category, defaultOpen = false, onSaveCategory, onDeleteCategory, onSaveItem, onDeleteItem, onAddItem,
+  category, items, open, onToggle, onSaveCategory, onDeleteCategory, onSaveItem, onDeleteItem, onAddItem,
   onUploadImage, onRemoveImage,
 }: Props) {
   const panelId = useId()
-  const [open, setOpen] = useState(defaultOpen)
   const [name, setName] = useState(category.name)
   const [note, setNote] = useState(category.note ?? '')
   const [saved, setSaved] = useState(false)
@@ -51,13 +53,15 @@ export default function CategoryEditor({
     }
   }
 
-  const itemCount = category.items.length
+  const shownItems = items ?? category.items
+  const itemCount = shownItems.length
+  const filtered = items !== undefined && items.length !== category.items.length
 
   return (
     <section className="mt-3 overflow-hidden rounded-xl border border-line-soft bg-card/40">
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={onToggle}
         aria-expanded={open}
         aria-controls={panelId}
         className="flex w-full cursor-pointer items-center gap-3 px-4 py-3.5 text-left hover:bg-card"
@@ -70,7 +74,7 @@ export default function CategoryEditor({
         </svg>
         <span className="flex-1 font-bold text-gold">{name || 'Sin nombre'}</span>
         <span className="rounded-full bg-line-soft px-2.5 py-0.5 text-xs text-muted">
-          {itemCount} {itemCount === 1 ? 'platillo' : 'platillos'}
+          {filtered ? `${itemCount} de ${category.items.length}` : `${itemCount} ${itemCount === 1 ? 'platillo' : 'platillos'}`}
         </span>
       </button>
 
@@ -98,7 +102,7 @@ export default function CategoryEditor({
               <button className="btn btn-sm btn-ghost" onClick={() => onDeleteCategory(category)}>Borrar</button>
             </div>
 
-            {category.items.map((item) => (
+            {shownItems.map((item) => (
               <ItemRow
                 key={item.id}
                 item={item}
