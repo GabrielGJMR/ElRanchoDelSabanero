@@ -52,8 +52,26 @@ export default function Admin() {
   }, [auth, logout])
 
   useEffect(() => {
-    if (auth) load()
-  }, [auth, load])
+    if (!auth) return
+    let cancelled = false
+    void (async () => {
+      try {
+        const [menuData, galleryData] = await Promise.all([
+          adminRequest<Category[]>(auth, 'menu'),
+          fetchGallery(),
+        ])
+        if (cancelled) return
+        setMenu(menuData)
+        setGallery(galleryData)
+        setOpenCategories((prev) => prev ?? new Set(menuData[0] ? [menuData[0].id] : []))
+      } catch (e) {
+        if (cancelled) return
+        if (e instanceof UnauthorizedError) logout()
+        else setError((e as Error).message)
+      }
+    })()
+    return () => { cancelled = true }
+  }, [auth, logout])
 
   /** Ejecuta una acción de escritura: muestra el error si falla y recarga el menú si sale bien. Devuelve si tuvo éxito. */
   async function run(action: () => Promise<unknown>, reload = false): Promise<boolean> {
@@ -271,7 +289,7 @@ export default function Admin() {
         </>
       )}
 
-      {error && <Toast message={error} onDismiss={() => setError('')} />}
+      {error && <Toast key={error} message={error} onDismiss={() => setError('')} />}
     </main>
   )
 }

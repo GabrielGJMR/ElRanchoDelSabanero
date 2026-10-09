@@ -10,7 +10,6 @@ export default function Toast({ message, onDismiss }: Props) {
   const [leaving, setLeaving] = useState(false)
 
   useEffect(() => {
-    setLeaving(false)
     const leave = setTimeout(() => setLeaving(true), 5000)
     const dismiss = setTimeout(onDismiss, 5300)
     return () => {
