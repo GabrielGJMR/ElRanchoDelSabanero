@@ -34,4 +34,7 @@ public class Item {
 
     @Column(nullable = false)
     private int position;
+
+    /** Nombre del archivo de la foto dentro de la carpeta de uploads; null si no tiene foto. */
+    private String image;
 }

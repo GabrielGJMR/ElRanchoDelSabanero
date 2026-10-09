@@ -1,0 +1,23 @@
+[Unit]
+Description=El Rancho del Sabanero (Spring Boot)
+After=network.target postgresql.service
+
+[Service]
+User=rancho
+Group=rancho
+WorkingDirectory=/opt/rancho
+# Variables secretas (DB_PASSWORD, ADMIN_PASSWORD...). Archivo con permisos 600, solo root.
+EnvironmentFile=/etc/rancho.env
+ExecStart=/usr/bin/java -Xmx512m -jar /opt/rancho/backend.jar
+Restart=on-failure
+RestartSec=5
+SuccessExitStatus=143
+
+# Endurecimiento basico
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

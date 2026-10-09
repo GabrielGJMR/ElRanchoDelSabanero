@@ -8,7 +8,9 @@ import com.ranchosabanero.backend.service.MenuService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -53,6 +55,16 @@ public class AdminController {
     @PutMapping("/items/{id}")
     public MenuItemResponse updateItem(@PathVariable Long id, @Valid @RequestBody ItemRequest request) {
         return menuService.updateItem(id, request);
+    }
+
+    @PostMapping(value = "/items/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public MenuItemResponse uploadImage(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
+        return menuService.setImage(id, file);
+    }
+
+    @DeleteMapping("/items/{id}/image")
+    public MenuItemResponse removeImage(@PathVariable Long id) {
+        return menuService.removeImage(id);
     }
 
     @DeleteMapping("/items/{id}")

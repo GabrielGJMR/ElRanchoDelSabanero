@@ -1,18 +1,22 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import type { MenuItem } from '../api.ts'
 
 interface Props {
   item: MenuItem
   onSave: (id: number, data: { name: string; description: string; price: number; available: boolean }) => Promise<boolean>
   onDelete: (item: MenuItem) => Promise<void>
+  onUploadImage: (id: number, file: File) => Promise<boolean>
+  onRemoveImage: (id: number) => Promise<boolean>
 }
 
-export default function ItemRow({ item, onSave, onDelete }: Props) {
+export default function ItemRow({ item, onSave, onDelete, onUploadImage, onRemoveImage }: Props) {
   const [name, setName] = useState(item.name)
   const [description, setDescription] = useState(item.description ?? '')
   const [price, setPrice] = useState(String(item.price))
   const [available, setAvailable] = useState(item.available)
   const [saved, setSaved] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const fileInput = useRef<HTMLInputElement>(null)
 
   async function save() {
     if (await onSave(item.id, { name, description, price: parseInt(price, 10), available })) {
@@ -21,8 +25,45 @@ export default function ItemRow({ item, onSave, onDelete }: Props) {
     }
   }
 
+  async function pickFile(file: File | undefined) {
+    if (!file) return
+    setUploading(true)
+    await onUploadImage(item.id, file)
+    setUploading(false)
+    if (fileInput.current) fileInput.current.value = '' // permite elegir la misma foto otra vez
+  }
+
   return (
-    <div className="my-1.5 grid grid-cols-2 items-center gap-2 lg:grid-cols-[1.2fr_1.4fr_110px_auto_auto_auto]">
+    <div className="my-1.5 grid grid-cols-2 items-center gap-2 lg:grid-cols-[64px_1.2fr_1.4fr_110px_auto_auto_auto]">
+      <div className="flex flex-col items-center gap-1">
+        <button
+          type="button"
+          onClick={() => fileInput.current?.click()}
+          disabled={uploading}
+          className="size-14 cursor-pointer overflow-hidden rounded-lg border border-line bg-[#120e0b] text-2xl text-muted hover:border-fire disabled:opacity-50"
+          title={item.imageUrl ? 'Cambiar foto' : 'Agregar foto'}
+          aria-label={item.imageUrl ? `Cambiar foto de ${item.name}` : `Agregar foto a ${item.name}`}
+        >
+          {uploading ? '…' : item.imageUrl ? <img src={item.imageUrl} alt="" className="size-full object-cover" /> : '+'}
+        </button>
+        {item.imageUrl && !uploading && (
+          <button
+            type="button"
+            onClick={() => onRemoveImage(item.id)}
+            className="cursor-pointer text-[11px] text-muted underline hover:text-fire"
+          >
+            Quitar
+          </button>
+        )}
+        <input
+          ref={fileInput}
+          type="file"
+          accept="image/*"
+          hidden
+          onChange={(e) => pickFile(e.target.files?.[0])}
+        />
+      </div>
+
       <input className="field" value={name} onChange={(e) => setName(e.target.value)} aria-label="Nombre del platillo" />
       <input
         className="field"

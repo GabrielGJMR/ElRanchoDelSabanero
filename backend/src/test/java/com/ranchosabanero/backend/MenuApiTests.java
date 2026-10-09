@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
@@ -73,5 +74,48 @@ class MenuApiTests {
                         .content("{\"categoryId\":1,\"name\":\"\",\"price\":-5}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").exists());
+    }
+
+    @Test
+    void adminCanUploadAndRemoveItemPhoto() throws Exception {
+        var admin = httpBasic("admin", "clave-de-prueba");
+        var png = new java.io.ByteArrayOutputStream();
+        javax.imageio.ImageIO.write(new java.awt.image.BufferedImage(20, 20, java.awt.image.BufferedImage.TYPE_INT_RGB), "png", png);
+
+        // el menú público no tiene foto al inicio
+        mvc.perform(get("/api/menu")).andExpect(jsonPath("$[0].items[0].imageUrl").doesNotExist());
+
+        String body = mvc.perform(multipart("/api/admin/items/1/image")
+                        .file(new MockMultipartFile("file", "foto.png", "image/png", png.toByteArray()))
+                        .with(admin))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.imageUrl").value(org.hamcrest.Matchers.startsWith("/uploads/")))
+                .andReturn().getResponse().getContentAsString();
+        String url = body.replaceAll(".*\"imageUrl\":\"([^\"]+)\".*", "$1");
+
+        mvc.perform(get(url)).andExpect(status().isOk());
+        mvc.perform(get("/api/menu")).andExpect(jsonPath("$[0].items[0].imageUrl").value(url));
+
+        mvc.perform(delete("/api/admin/items/1/image").with(admin))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.imageUrl").doesNotExist());
+        mvc.perform(get(url)).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void uploadRejectsFilesThatAreNotImagesAndRequiresLogin() throws Exception {
+        var fake = new MockMultipartFile("file", "foto.png", "image/png", "esto no es una imagen".getBytes());
+
+        mvc.perform(multipart("/api/admin/items/1/image").file(fake).with(httpBasic("admin", "clave-de-prueba")))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").exists());
+        mvc.perform(multipart("/api/admin/items/1/image").file(fake)).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void pageRoutesServeTheReactApp() throws Exception {
+        for (String route : new String[] {"/menu", "/ubicacion", "/contacto", "/admin"}) {
+            mvc.perform(get(route)).andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl("/index.html"));
+        }
     }
 }

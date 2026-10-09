@@ -4,6 +4,7 @@ export interface MenuItem {
   description: string | null
   price: number
   available: boolean
+  imageUrl: string | null
 }
 
 export interface Category {
@@ -45,11 +46,13 @@ export function basicAuth(user: string, password: string): string {
   return 'Basic ' + btoa(String.fromCharCode(...bytes))
 }
 
+/** body puede ser un objeto (se envía como JSON) o un FormData (para subir fotos). */
 export async function adminRequest<T>(auth: string, path: string, method = 'GET', body?: unknown): Promise<T> {
+  const isForm = body instanceof FormData
   const res = await fetch('/api/admin/' + path, {
     method,
-    headers: { 'Content-Type': 'application/json', Authorization: auth },
-    body: body === undefined ? undefined : JSON.stringify(body),
+    headers: isForm ? { Authorization: auth } : { 'Content-Type': 'application/json', Authorization: auth },
+    body: body === undefined ? undefined : isForm ? body : JSON.stringify(body),
   })
   if (res.status === 401) throw new UnauthorizedError('No autorizado')
   return parse<T>(res)

@@ -9,10 +9,12 @@ interface Props {
   onSaveItem: (id: number, data: ItemInput) => Promise<boolean>
   onDeleteItem: (item: MenuItem) => Promise<void>
   onAddItem: (data: ItemInput) => Promise<boolean>
+  onUploadImage: (id: number, file: File) => Promise<boolean>
+  onRemoveImage: (id: number) => Promise<boolean>
 }
 
 export default function CategoryEditor({
-  category, onSaveCategory, onDeleteCategory, onSaveItem, onDeleteItem, onAddItem,
+  category, onSaveCategory, onDeleteCategory, onSaveItem, onDeleteItem, onAddItem, onUploadImage, onRemoveImage,
 }: Props) {
   const [name, setName] = useState(category.name)
   const [note, setNote] = useState(category.note ?? '')
@@ -64,10 +66,18 @@ export default function CategoryEditor({
       </div>
 
       {category.items.map((item) => (
-        <ItemRow key={item.id} item={item} onSave={onSaveItem} onDelete={onDeleteItem} />
+        <ItemRow
+          key={item.id}
+          item={item}
+          onSave={onSaveItem}
+          onDelete={onDeleteItem}
+          onUploadImage={onUploadImage}
+          onRemoveImage={onRemoveImage}
+        />
       ))}
 
-      <div className="my-1.5 grid grid-cols-2 items-center gap-2 lg:grid-cols-[1.2fr_1.4fr_110px_auto]">
+      <div className="my-1.5 grid grid-cols-2 items-center gap-2 lg:grid-cols-[64px_1.2fr_1.4fr_110px_auto]">
+        <span className="hidden lg:block" />
         <input className="field" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Nuevo platillo" />
         <input
           className="field"

@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -51,8 +53,12 @@ public class SecurityConfig {
     @Bean
     UserDetailsService users(@Value("${app.admin.username}") String username,
                              @Value("${app.admin.password}") String password,
-                             PasswordEncoder encoder) {
+                             PasswordEncoder encoder,
+                             Environment environment) {
         if (password == null || password.isBlank()) {
+            if (environment.acceptsProfiles(Profiles.of("prod"))) {
+                throw new IllegalStateException("En producción debe definir la variable ADMIN_PASSWORD");
+            }
             byte[] bytes = new byte[9];
             new SecureRandom().nextBytes(bytes);
             password = HexFormat.of().formatHex(bytes);

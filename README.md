@@ -42,6 +42,17 @@ cd ../backend && ./mvnw spring-boot:run
 ```
 La web y la API quedan en http://localhost:8080 (administración en `/admin`).
 
+## Páginas
+`/` Inicio · `/menu` Menú · `/ubicacion` Ubicación (mapa de Google) · `/contacto` Contacto · `/admin` Administración
+
+## Fotos
+- **Fotos de los platillos:** se suben desde `/admin` (botón `+` junto a cada platillo). El navegador las reduce a 1200 px antes de subirlas.
+  Se guardan en la carpeta `uploads/` (variable `UPLOADS_DIR`), fuera de Git. Si un platillo no tiene foto, se muestra un recuadro con el escudo.
+- **Fotos del local (Inicio):** copie los archivos JPG, PNG o WebP a `frontend/src/assets/local/` y aparecen solas en la galería, en orden
+  alfabético. La primera se muestra más grande. Procure que pesen menos de 500 KB cada una.
+- **Foto de fondo del Inicio (opcional):** un archivo `frontend/src/assets/hero.jpg`.
+- Después de agregar fotos del local: `npm run build` otra vez (ver "Correr todo junto").
+
 ## API
 | Ruta | Acceso |
 |---|---|
@@ -49,6 +60,7 @@ La web y la API quedan en http://localhost:8080 (administración en `/admin`).
 | `GET /api/admin/menu` | admin (incluye platillos ocultos) |
 | `POST/PUT/DELETE /api/admin/categories[/{id}]` | admin |
 | `POST/PUT/DELETE /api/admin/items[/{id}]` | admin |
+| `POST/DELETE /api/admin/items/{id}/image` | admin (sube o quita la foto) |
 
 ## Pruebas
 ```bash
@@ -58,4 +70,3 @@ Usan H2 en memoria, no necesitan PostgreSQL.
 
 ## Pendiente
 - Registro e inicio de sesión opcional para clientes (tabla `users`, rol `CUSTOMER`, rutas `/api/auth/**`).
-- Fotos de los platillos y logo.

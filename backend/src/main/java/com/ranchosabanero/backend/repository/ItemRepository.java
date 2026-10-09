@@ -11,6 +11,8 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     List<Item> findAllByOrderByPositionAscIdAsc();
 
+    List<Item> findByCategoryId(Long categoryId);
+
     @Query("select coalesce(max(i.position), -1) + 1 from Item i where i.category.id = :categoryId")
     int nextPosition(@Param("categoryId") Long categoryId);
 }

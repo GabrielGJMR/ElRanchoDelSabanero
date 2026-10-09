@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.LinkedHashMap;
@@ -25,6 +26,7 @@ public class MenuService {
 
     private final CategoryRepository categories;
     private final ItemRepository items;
+    private final ImageStorage images;
 
     /** @param onlyAvailable true para el menú público, false para el panel de administración */
     @Transactional(readOnly = true)
@@ -58,7 +60,10 @@ public class MenuService {
 
     @Transactional
     public void deleteCategory(Long id) {
-        categories.delete(findCategory(id)); // borra también sus platillos (ON DELETE CASCADE)
+        Category category = findCategory(id);
+        List<String> photos = items.findByCategoryId(id).stream().map(Item::getImage).toList();
+        categories.delete(category); // borra también sus platillos (ON DELETE CASCADE)
+        photos.forEach(images::delete);
     }
 
     // ---- Platillos ----
@@ -78,18 +83,39 @@ public class MenuService {
 
     @Transactional
     public MenuItemResponse updateItem(Long id, ItemRequest req) {
-        Item item = items.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Platillo no encontrado"));
+        Item item = findItem(id);
         applyItem(item, req);
         return MenuItemResponse.from(item);
     }
 
     @Transactional
     public void deleteItem(Long id) {
-        if (!items.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Platillo no encontrado");
-        }
-        items.deleteById(id);
+        Item item = findItem(id);
+        items.delete(item);
+        images.delete(item.getImage());
+    }
+
+    /** Guarda (o reemplaza) la foto del platillo. */
+    @Transactional
+    public MenuItemResponse setImage(Long id, MultipartFile file) {
+        Item item = findItem(id);
+        String previous = item.getImage();
+        item.setImage(images.store(file));
+        images.delete(previous);
+        return MenuItemResponse.from(item);
+    }
+
+    @Transactional
+    public MenuItemResponse removeImage(Long id) {
+        Item item = findItem(id);
+        images.delete(item.getImage());
+        item.setImage(null);
+        return MenuItemResponse.from(item);
+    }
+
+    private Item findItem(Long id) {
+        return items.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Platillo no encontrado"));
     }
 
     private Category findCategory(Long id) {

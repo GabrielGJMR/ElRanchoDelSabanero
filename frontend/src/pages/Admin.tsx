@@ -3,7 +3,9 @@ import {
   adminRequest, basicAuth, UnauthorizedError,
   type Category, type CategoryInput, type ItemInput, type MenuItem,
 } from '../api.ts'
+import Brand from '../components/Brand.tsx'
 import CategoryEditor from '../components/CategoryEditor.tsx'
+import { resizeImage } from '../image.ts'
 import LoginForm from '../components/LoginForm.tsx'
 
 // Las credenciales viven solo en esta pestaña (sessionStorage) y se envían como HTTP Basic.
@@ -77,6 +79,15 @@ export default function Admin() {
 
   const addItem = (data: ItemInput) => run(() => adminRequest(auth, 'items', 'POST', data), true)
 
+  const uploadImage = (id: number, file: File) =>
+    run(async () => {
+      const form = new FormData()
+      form.append('file', await resizeImage(file), 'foto.jpg')
+      await adminRequest(auth, `items/${id}/image`, 'POST', form)
+    }, true)
+
+  const removeImage = (id: number) => run(() => adminRequest(auth, `items/${id}/image`, 'DELETE'), true)
+
   async function addCategory() {
     if (await run(() => adminRequest(auth, 'categories', 'POST', newCategory), true)) {
       setNewCategory({ name: '', note: '' })
@@ -85,7 +96,10 @@ export default function Admin() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-6">
-      <h1 className="mb-4 text-3xl text-gold">Administración del menú</h1>
+      <div className="mb-5 flex items-center justify-between border-b border-line-soft pb-4">
+        <Brand />
+        <span className="text-xs tracking-[.14em] text-muted uppercase">Administración</span>
+      </div>
 
       {!auth && <LoginForm onLogin={login} />}
 
@@ -108,6 +122,8 @@ export default function Admin() {
               onSaveItem={saveItem}
               onDeleteItem={deleteItem}
               onAddItem={addItem}
+              onUploadImage={uploadImage}
+              onRemoveImage={removeImage}
             />
           ))}
 
