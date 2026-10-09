@@ -124,7 +124,7 @@ export default function CategoryEditor({
             )}
 
             {addingItem && (
-              <div className="my-3 grid grid-cols-2 items-center gap-2 rounded-lg border border-dashed border-line p-2.5 lg:grid-cols-[1.2fr_1.4fr_110px_auto_auto]">
+              <div className="my-3 flex flex-col gap-2 rounded-lg border border-dashed border-line p-2.5 lg:grid lg:grid-cols-[1.2fr_1.4fr_110px_auto_auto] lg:items-center">
                 <input
                   className="field"
                   autoFocus
@@ -147,8 +147,10 @@ export default function CategoryEditor({
                   onChange={(e) => setNewPrice(e.target.value)}
                   placeholder="Precio"
                 />
-                <button className="btn btn-sm" onClick={addItem}>Agregar</button>
-                <button className="btn btn-sm btn-ghost" onClick={() => setAddingItem(false)}>Cancelar</button>
+                <div className="flex gap-2 lg:contents">
+                  <button className="btn btn-sm flex-1 lg:flex-initial" onClick={addItem}>Agregar</button>
+                  <button className="btn btn-sm btn-ghost flex-1 lg:flex-initial" onClick={() => setAddingItem(false)}>Cancelar</button>
+                </div>
               </div>
             )}
           </div>
