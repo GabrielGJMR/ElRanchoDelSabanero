@@ -84,3 +84,6 @@ form .btn { width: 100%; margin-top: 8px; }
   .admin .cat-row, .admin .item-row, .admin .item-row.new { grid-template-columns: 1fr 1fr; }
 }
 .admin #login label { margin: 10px 0; white-space: normal; }
+
+.banner { background: #3a1410; border: 1px solid var(--fire); border-radius: 8px; padding: 10px 14px; margin: 12px 0; }
+.admin .row input[type=checkbox] { accent-color: var(--fire); }

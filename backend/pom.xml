@@ -108,9 +108,9 @@
 			<resource>
 				<directory>src/main/resources</directory>
 			</resource>
-			<!-- La web (carpeta frontend) se empaqueta como contenido estático -->
+			<!-- La web de React (ejecutar `npm run build` en frontend/) se empaqueta como contenido estático -->
 			<resource>
-				<directory>../frontend</directory>
+				<directory>../frontend/dist</directory>
 				<targetPath>static</targetPath>
 			</resource>
 		</resources>
