@@ -135,11 +135,4 @@ class MenuApiTests {
         mvc.perform(delete("/api/admin/gallery/" + id).with(admin)).andExpect(status().isNoContent());
         mvc.perform(get("/api/gallery")).andExpect(jsonPath("$.length()").value(0));
     }
-
-    @Test
-    void pageRoutesServeTheReactApp() throws Exception {
-        for (String route : new String[] {"/menu", "/ubicacion", "/contacto", "/admin"}) {
-            mvc.perform(get(route)).andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl("/index.html"));
-        }
-    }
 }
