@@ -10,6 +10,8 @@ Internet ──HTTPS──> Nginx (80/443) ──> backend.jar (127.0.0.1:8080) 
 ## 0. Antes de empezar
 - Un VPS con Ubuntu, acceso por SSH y 1 GB de RAM como mínimo.
 - Un dominio con el registro DNS tipo **A** (`tudominio.com` y `www`) apuntando a la IP del VPS.
+- Una cuenta de [Cloudinary](https://cloudinary.com) (gratis): ahí se guardan las fotos de los platillos
+  y de la galería del local, no en el VPS. Copie Cloud name, API Key y API Secret del Dashboard.
 
 ## 1. Preparar el servidor (una sola vez)
 ```bash
@@ -34,7 +36,7 @@ Las tablas y el menú inicial los crea la aplicación sola al arrancar (Flyway).
 ## 3. Usuario y variables secretas
 ```bash
 sudo useradd --system --home /opt/rancho --shell /usr/sbin/nologin rancho
-sudo mkdir -p /opt/rancho/uploads && sudo chown -R rancho:rancho /opt/rancho   # uploads = fotos de los platillos
+sudo mkdir -p /opt/rancho && sudo chown -R rancho:rancho /opt/rancho
 sudo nano /etc/rancho.env
 ```
 Contenido de `/etc/rancho.env` (use sus propias claves):
@@ -45,12 +47,14 @@ DB_USER=rancho
 DB_PASSWORD=UNA-CLAVE-LARGA-Y-UNICA
 ADMIN_USER=admin
 ADMIN_PASSWORD=OTRA-CLAVE-LARGA-PARA-EL-PANEL
-UPLOADS_DIR=/opt/rancho/uploads
+CLOUDINARY_CLOUD_NAME=su-cloud-name
+CLOUDINARY_API_KEY=su-api-key
+CLOUDINARY_API_SECRET=su-api-secret
 ```
 ```bash
 sudo chmod 600 /etc/rancho.env
 ```
-En producción la aplicación **no arranca** si falta `ADMIN_PASSWORD`.
+En producción la aplicación **no arranca** si falta `ADMIN_PASSWORD` o cualquiera de las 3 variables de Cloudinary.
 
 ## 4. Construir el jar (en su computadora)
 ```bash
@@ -97,22 +101,20 @@ Repita el paso 4, suba el jar y reinicie:
 scp backend/target/backend-0.0.1-SNAPSHOT.jar usuario@IP_DEL_VPS:/tmp/backend.jar
 ssh usuario@IP_DEL_VPS 'sudo mv /tmp/backend.jar /opt/rancho/backend.jar && sudo chown rancho:rancho /opt/rancho/backend.jar && sudo systemctl restart rancho'
 ```
-El menú y los precios que editó en el panel **no se pierden**: están en PostgreSQL, no en el jar. Las fotos de los platillos tampoco: están en `/opt/rancho/uploads`, fuera del jar.
+El menú y los precios que editó en el panel **no se pierden**: están en PostgreSQL, no en el jar. Las fotos
+(platillos y galería del local) tampoco: están en Cloudinary, fuera del VPS y del jar.
 
 ## 8. Copias de seguridad
 ```bash
 sudo -u postgres pg_dump rancho | gzip > rancho-$(date +%F).sql.gz
 ```
-Las fotos de los platillos se guardan aparte, así que respáldelas también:
-```bash
-sudo tar czf rancho-fotos-$(date +%F).tar.gz -C /opt/rancho uploads
-```
-Programe ambos con `cron` y guarde las copias fuera del VPS.
+Las fotos ya están respaldadas por Cloudinary; no hace falta copiarlas aparte. Programe el respaldo de la
+base de datos con `cron` y guarde las copias fuera del VPS.
 
 ## Checklist rápido
 - [ ] DNS apunta a la IP del VPS
 - [ ] Claves de `/etc/rancho.env` únicas y largas (no las de este ejemplo)
+- [ ] Cuenta de Cloudinary creada y las 3 variables `CLOUDINARY_*` definidas
 - [ ] `https://` funciona y `http://` redirige
 - [ ] Mapa de Google actualizado en `frontend/src/config.ts` (`mapsEmbed`) antes de construir
-- [ ] Fotos del local en `frontend/src/assets/local/` antes de construir (ver README)
-- [ ] Copia de seguridad programada (base de datos y fotos)
+- [ ] Copia de seguridad de la base de datos programada

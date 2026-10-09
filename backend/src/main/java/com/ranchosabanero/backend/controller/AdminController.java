@@ -1,9 +1,11 @@
 package com.ranchosabanero.backend.controller;
 
 import com.ranchosabanero.backend.dto.CategoryRequest;
+import com.ranchosabanero.backend.dto.GalleryPhotoResponse;
 import com.ranchosabanero.backend.dto.ItemRequest;
 import com.ranchosabanero.backend.dto.MenuCategoryResponse;
 import com.ranchosabanero.backend.dto.MenuItemResponse;
+import com.ranchosabanero.backend.service.GalleryService;
 import com.ranchosabanero.backend.service.MenuService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,7 @@ import java.util.List;
 public class AdminController {
 
     private final MenuService menuService;
+    private final GalleryService galleryService;
 
     /** Menú completo, incluidos los platillos desactivados. También sirve para comprobar el login. */
     @GetMapping("/menu")
@@ -71,5 +74,19 @@ public class AdminController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteItem(@PathVariable Long id) {
         menuService.deleteItem(id);
+    }
+
+    // ---- Galería del local ("Así es el rancho" en la portada) ----
+
+    @PostMapping(value = "/gallery", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
+    public GalleryPhotoResponse addGalleryPhoto(@RequestParam("file") MultipartFile file) {
+        return galleryService.add(file);
+    }
+
+    @DeleteMapping("/gallery/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteGalleryPhoto(@PathVariable Long id) {
+        galleryService.delete(id);
     }
 }

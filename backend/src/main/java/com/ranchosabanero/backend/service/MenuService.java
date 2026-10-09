@@ -24,6 +24,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MenuService {
 
+    private static final String ITEM_PHOTOS_FOLDER = "rancho/platillos";
+
     private final CategoryRepository categories;
     private final ItemRepository items;
     private final ImageStorage images;
@@ -34,7 +36,7 @@ public class MenuService {
         Map<Long, List<MenuItemResponse>> byCategory = items.findAllByOrderByPositionAscIdAsc().stream()
                 .filter(i -> !onlyAvailable || i.isAvailable())
                 .collect(Collectors.groupingBy(i -> i.getCategory().getId(), LinkedHashMap::new,
-                        Collectors.mapping(MenuItemResponse::from, Collectors.toList())));
+                        Collectors.mapping(i -> MenuItemResponse.from(i, images), Collectors.toList())));
 
         return categories.findAllByOrderByPositionAscIdAsc().stream()
                 .map(c -> new MenuCategoryResponse(c.getId(), c.getName(), c.getNote(),
@@ -78,14 +80,14 @@ public class MenuService {
         item.setCategory(category);
         item.setPosition(items.nextPosition(category.getId()));
         applyItem(item, req);
-        return MenuItemResponse.from(items.save(item));
+        return MenuItemResponse.from(items.save(item), images);
     }
 
     @Transactional
     public MenuItemResponse updateItem(Long id, ItemRequest req) {
         Item item = findItem(id);
         applyItem(item, req);
-        return MenuItemResponse.from(item);
+        return MenuItemResponse.from(item, images);
     }
 
     @Transactional
@@ -100,9 +102,9 @@ public class MenuService {
     public MenuItemResponse setImage(Long id, MultipartFile file) {
         Item item = findItem(id);
         String previous = item.getImage();
-        item.setImage(images.store(file));
+        item.setImage(images.store(file, ITEM_PHOTOS_FOLDER));
         images.delete(previous);
-        return MenuItemResponse.from(item);
+        return MenuItemResponse.from(item, images);
     }
 
     @Transactional
@@ -110,7 +112,7 @@ public class MenuService {
         Item item = findItem(id);
         images.delete(item.getImage());
         item.setImage(null);
-        return MenuItemResponse.from(item);
+        return MenuItemResponse.from(item, images);
     }
 
     private Item findItem(Long id) {

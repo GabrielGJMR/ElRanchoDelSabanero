@@ -89,17 +89,15 @@ class MenuApiTests {
                         .file(new MockMultipartFile("file", "foto.png", "image/png", png.toByteArray()))
                         .with(admin))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.imageUrl").value(org.hamcrest.Matchers.startsWith("/uploads/")))
+                .andExpect(jsonPath("$.imageUrl").value(org.hamcrest.Matchers.startsWith("https://res.cloudinary.com/")))
                 .andReturn().getResponse().getContentAsString();
         String url = body.replaceAll(".*\"imageUrl\":\"([^\"]+)\".*", "$1");
 
-        mvc.perform(get(url)).andExpect(status().isOk());
         mvc.perform(get("/api/menu")).andExpect(jsonPath("$[0].items[0].imageUrl").value(url));
 
         mvc.perform(delete("/api/admin/items/1/image").with(admin))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.imageUrl").doesNotExist());
-        mvc.perform(get(url)).andExpect(status().isNotFound());
     }
 
     @Test
@@ -110,6 +108,32 @@ class MenuApiTests {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").exists());
         mvc.perform(multipart("/api/admin/items/1/image").file(fake)).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void adminCanManageGalleryPhotos() throws Exception {
+        var admin = httpBasic("admin", "clave-de-prueba");
+        var png = new java.io.ByteArrayOutputStream();
+        javax.imageio.ImageIO.write(new java.awt.image.BufferedImage(10, 10, java.awt.image.BufferedImage.TYPE_INT_RGB), "png", png);
+
+        mvc.perform(get("/api/gallery")).andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(0));
+
+        mvc.perform(multipart("/api/admin/gallery")
+                        .file(new MockMultipartFile("file", "local.png", "image/png", png.toByteArray())))
+                .andExpect(status().isUnauthorized());
+
+        String body = mvc.perform(multipart("/api/admin/gallery")
+                        .file(new MockMultipartFile("file", "local.png", "image/png", png.toByteArray()))
+                        .with(admin))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.url").value(org.hamcrest.Matchers.startsWith("https://res.cloudinary.com/")))
+                .andReturn().getResponse().getContentAsString();
+        String id = body.replaceAll(".*\"id\":(\\d+).*", "$1");
+
+        mvc.perform(get("/api/gallery")).andExpect(jsonPath("$.length()").value(1));
+
+        mvc.perform(delete("/api/admin/gallery/" + id).with(admin)).andExpect(status().isNoContent());
+        mvc.perform(get("/api/gallery")).andExpect(jsonPath("$.length()").value(0));
     }
 
     @Test

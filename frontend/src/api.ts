@@ -27,6 +27,11 @@ export interface CategoryInput {
   note: string
 }
 
+export interface GalleryPhoto {
+  id: number
+  url: string
+}
+
 export class UnauthorizedError extends Error {}
 
 async function parse<T>(res: Response): Promise<T> {
@@ -38,6 +43,10 @@ async function parse<T>(res: Response): Promise<T> {
 
 export async function fetchMenu(): Promise<Category[]> {
   return parse(await fetch('/api/menu'))
+}
+
+export async function fetchGallery(): Promise<GalleryPhoto[]> {
+  return parse(await fetch('/api/gallery'))
 }
 
 /** Cabecera HTTP Basic (soporta acentos en usuario y clave). */

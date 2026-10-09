@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
-  adminRequest, basicAuth, UnauthorizedError,
-  type Category, type CategoryInput, type ItemInput, type MenuItem,
+  adminRequest, basicAuth, fetchGallery, UnauthorizedError,
+  type Category, type CategoryInput, type GalleryPhoto, type ItemInput, type MenuItem,
 } from '../api.ts'
 import Brand from '../components/Brand.tsx'
 import CategoryEditor from '../components/CategoryEditor.tsx'
+import GalleryEditor from '../components/GalleryEditor.tsx'
 import { resizeImage } from '../image.ts'
 import LoginForm from '../components/LoginForm.tsx'
 
@@ -14,6 +15,7 @@ const STORAGE_KEY = 'adminAuth'
 export default function Admin() {
   const [auth, setAuth] = useState(() => sessionStorage.getItem(STORAGE_KEY) ?? '')
   const [menu, setMenu] = useState<Category[] | null>(null)
+  const [gallery, setGallery] = useState<GalleryPhoto[] | null>(null)
   const [error, setError] = useState('')
   const [newCategory, setNewCategory] = useState({ name: '', note: '' })
 
@@ -21,11 +23,17 @@ export default function Admin() {
     sessionStorage.removeItem(STORAGE_KEY)
     setAuth('')
     setMenu(null)
+    setGallery(null)
   }, [])
 
   const load = useCallback(async () => {
     try {
-      setMenu(await adminRequest<Category[]>(auth, 'menu'))
+      const [menuData, galleryData] = await Promise.all([
+        adminRequest<Category[]>(auth, 'menu'),
+        fetchGallery(),
+      ])
+      setMenu(menuData)
+      setGallery(galleryData)
     } catch (e) {
       if (e instanceof UnauthorizedError) logout()
       else setError((e as Error).message)
@@ -88,6 +96,17 @@ export default function Admin() {
 
   const removeImage = (id: number) => run(() => adminRequest(auth, `items/${id}/image`, 'DELETE'), true)
 
+  const uploadGalleryPhoto = (file: File) =>
+    run(async () => {
+      const form = new FormData()
+      form.append('file', await resizeImage(file), 'foto.jpg')
+      await adminRequest(auth, 'gallery', 'POST', form)
+    }, true)
+
+  const deleteGalleryPhoto = async (photo: GalleryPhoto) => {
+    await run(() => adminRequest(auth, `gallery/${photo.id}`, 'DELETE'), true)
+  }
+
   async function addCategory() {
     if (await run(() => adminRequest(auth, 'categories', 'POST', newCategory), true)) {
       setNewCategory({ name: '', note: '' })
@@ -146,6 +165,10 @@ export default function Admin() {
                 <button className="btn btn-sm" onClick={addCategory}>Agregar</button>
               </div>
             </>
+          )}
+
+          {gallery && (
+            <GalleryEditor photos={gallery} onUpload={uploadGalleryPhoto} onDelete={deleteGalleryPhoto} />
           )}
         </>
       )}

@@ -9,6 +9,7 @@ Sitio web del restaurante (Liberia, Costa Rica): menú público y panel de admin
 - Java 21
 - Node.js 20 o superior
 - PostgreSQL con una base de datos llamada `rancho`
+- Una cuenta de [Cloudinary](https://cloudinary.com) (gratis) para las fotos
 
 ## Base de datos (una sola vez)
 Con PostgreSQL instalado, crea la base de datos:
@@ -21,14 +22,19 @@ Por defecto el backend usa `postgres` / `dev` en `localhost:5432`. Para cambiarl
 Dos terminales:
 ```bash
 cd backend
-ADMIN_PASSWORD=tu-clave ./mvnw spring-boot:run     # API en http://localhost:8080
+ADMIN_PASSWORD=tu-clave \
+CLOUDINARY_CLOUD_NAME=tu-cloud-name CLOUDINARY_API_KEY=tu-api-key CLOUDINARY_API_SECRET=tu-api-secret \
+./mvnw spring-boot:run     # API en http://localhost:8080
 ```
 ```bash
 cd frontend
 npm install        # solo la primera vez
 npm run dev        # web en http://localhost:5173 (envía /api al backend)
 ```
-(En PowerShell: `$env:ADMIN_PASSWORD="tu-clave"; ./mvnw spring-boot:run`)
+(En PowerShell: `$env:ADMIN_PASSWORD="tu-clave"; $env:CLOUDINARY_CLOUD_NAME="..."; $env:CLOUDINARY_API_KEY="..."; $env:CLOUDINARY_API_SECRET="..."; ./mvnw spring-boot:run`)
+
+Sin las variables de Cloudinary el backend arranca igual (útil si solo va a tocar el menú), pero subir o
+borrar fotos falla hasta que las defina. Los 3 valores están en el Dashboard de cloudinary.com, cuenta gratis.
 
 - Menú público: http://localhost:5173
 - Administración: http://localhost:5173/admin (usuario `admin`)
@@ -46,21 +52,23 @@ La web y la API quedan en http://localhost:8080 (administración en `/admin`).
 `/` Inicio · `/menu` Menú · `/ubicacion` Ubicación (mapa de Google) · `/contacto` Contacto · `/admin` Administración
 
 ## Fotos
-- **Fotos de los platillos:** se suben desde `/admin` (botón `+` junto a cada platillo). El navegador las reduce a 1200 px antes de subirlas.
-  Se guardan en la carpeta `uploads/` (variable `UPLOADS_DIR`), fuera de Git. Si un platillo no tiene foto, se muestra un recuadro con el escudo.
-- **Fotos del local (Inicio):** copie los archivos JPG, PNG o WebP a `frontend/src/assets/local/` y aparecen solas en la galería, en orden
-  alfabético. La primera se muestra más grande. Procure que pesen menos de 500 KB cada una.
-- **Foto de fondo del Inicio (opcional):** un archivo `frontend/src/assets/hero.jpg`.
-- Después de agregar fotos del local: `npm run build` otra vez (ver "Correr todo junto").
+Todas las fotos (platillos y galería del local) se guardan en **Cloudinary**, no en el repositorio ni en el
+servidor. El navegador las reduce a 1200 px antes de subirlas.
+- **Fotos de los platillos:** botón `+` junto a cada platillo en `/admin`. Si un platillo no tiene foto, se
+  muestra un recuadro con el escudo.
+- **Fotos del local (sección "Así es el rancho" en Inicio):** sección "Fotos del local" al final de `/admin`.
+  Suba o borre las que quiera, sin tocar código ni recompilar.
 
 ## API
 | Ruta | Acceso |
 |---|---|
 | `GET /api/menu` | público |
+| `GET /api/gallery` | público |
 | `GET /api/admin/menu` | admin (incluye platillos ocultos) |
 | `POST/PUT/DELETE /api/admin/categories[/{id}]` | admin |
 | `POST/PUT/DELETE /api/admin/items[/{id}]` | admin |
 | `POST/DELETE /api/admin/items/{id}/image` | admin (sube o quita la foto) |
+| `POST/DELETE /api/admin/gallery[/{id}]` | admin (foto del local) |
 
 ## Pruebas
 ```bash
