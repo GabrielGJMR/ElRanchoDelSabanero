@@ -22,13 +22,19 @@ export default function GalleryEditor({ photos, onUpload, onDelete }: Props) {
 
   return (
     <section>
-      <h2 className="mt-8 mb-1.5 text-lg text-gold">Fotos del local</h2>
-      <p className="mb-3 text-sm text-muted">Salen en "Así es el rancho", en la portada.</p>
+      <p className="mb-4 text-sm text-muted">Salen en "Así es el rancho", en la portada. Suba o borre las que quiera.</p>
+
+      {photos.length === 0 && (
+        <p className="mb-4 text-sm text-muted italic">Todavía no hay fotos. Agregue la primera.</p>
+      )}
 
       <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6">
         {photos.map((photo) => (
-          <div key={photo.id} className="group relative aspect-square overflow-hidden rounded-lg border border-line">
-            <img src={photo.url} alt="" className="size-full object-cover" />
+          <div
+            key={photo.id}
+            className="group relative aspect-square animate-[fade-in_.25s_ease-out] overflow-hidden rounded-lg border border-line"
+          >
+            <img src={photo.url} alt="" className="size-full object-cover transition-transform duration-300 group-hover:scale-105" />
             <button
               type="button"
               onClick={() => onDelete(photo)}
@@ -44,7 +50,7 @@ export default function GalleryEditor({ photos, onUpload, onDelete }: Props) {
           type="button"
           onClick={() => fileInput.current?.click()}
           disabled={uploading}
-          className="flex aspect-square cursor-pointer items-center justify-center rounded-lg border border-dashed border-line text-2xl text-muted hover:border-fire disabled:opacity-50"
+          className="flex aspect-square cursor-pointer items-center justify-center rounded-lg border border-dashed border-line text-2xl text-muted transition-colors hover:border-fire hover:text-fire disabled:opacity-50"
           aria-label="Agregar foto del local"
         >
           {uploading ? '…' : '+'}

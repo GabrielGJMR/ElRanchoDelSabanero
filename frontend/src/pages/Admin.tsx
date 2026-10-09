@@ -8,15 +8,20 @@ import CategoryEditor from '../components/CategoryEditor.tsx'
 import GalleryEditor from '../components/GalleryEditor.tsx'
 import { resizeImage } from '../image.ts'
 import LoginForm from '../components/LoginForm.tsx'
+import Toast from '../components/Toast.tsx'
 
 // Las credenciales viven solo en esta pestaña (sessionStorage) y se envían como HTTP Basic.
 const STORAGE_KEY = 'adminAuth'
+
+type Tab = 'menu' | 'gallery'
 
 export default function Admin() {
   const [auth, setAuth] = useState(() => sessionStorage.getItem(STORAGE_KEY) ?? '')
   const [menu, setMenu] = useState<Category[] | null>(null)
   const [gallery, setGallery] = useState<GalleryPhoto[] | null>(null)
   const [error, setError] = useState('')
+  const [tab, setTab] = useState<Tab>('menu')
+  const [addingCategory, setAddingCategory] = useState(false)
   const [newCategory, setNewCategory] = useState({ name: '', note: '' })
 
   const logout = useCallback(() => {
@@ -110,8 +115,11 @@ export default function Admin() {
   async function addCategory() {
     if (await run(() => adminRequest(auth, 'categories', 'POST', newCategory), true)) {
       setNewCategory({ name: '', note: '' })
+      setAddingCategory(false)
     }
   }
+
+  const itemCount = menu?.reduce((n, c) => n + c.items.length, 0) ?? 0
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-6">
@@ -124,54 +132,96 @@ export default function Admin() {
 
       {auth && (
         <>
-          <p className="mb-4">
-            <button className="btn btn-sm" onClick={logout}>Cerrar sesión</button>
-          </p>
-          {error && (
-            <p className="my-3 rounded-lg border border-fire bg-[#3a1410] px-3.5 py-2.5" role="alert">{error}</p>
-          )}
-          {!menu && <p className="text-sm text-muted">Cargando...</p>}
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm text-muted">
+              {menu ? `${menu.length} categorías · ${itemCount} platillos` : 'Cargando...'}
+              {gallery && ` · ${gallery.length} fotos del local`}
+            </p>
+            <button className="btn btn-sm btn-ghost" onClick={logout}>Cerrar sesión</button>
+          </div>
 
-          {menu?.map((c) => (
-            <CategoryEditor
-              key={c.id}
-              category={c}
-              onSaveCategory={saveCategory}
-              onDeleteCategory={deleteCategory}
-              onSaveItem={saveItem}
-              onDeleteItem={deleteItem}
-              onAddItem={addItem}
-              onUploadImage={uploadImage}
-              onRemoveImage={removeImage}
-            />
-          ))}
+          <div role="tablist" aria-label="Secciones del panel" className="mb-5 flex gap-1 border-b border-line-soft">
+            {([
+              ['menu', 'Menú'],
+              ['gallery', 'Fotos del local'],
+            ] as const).map(([value, label]) => (
+              <button
+                key={value}
+                role="tab"
+                aria-selected={tab === value}
+                onClick={() => setTab(value)}
+                className={`cursor-pointer border-b-2 px-3.5 py-2 text-sm font-semibold transition-colors ${
+                  tab === value ? 'border-fire text-gold' : 'border-transparent text-muted hover:text-ink'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
 
-          {menu && (
-            <>
-              <h2 className="mt-8 mb-1.5 text-lg text-gold">Nueva categoría</h2>
-              <div className="grid grid-cols-2 items-center gap-2 sm:grid-cols-[1fr_1fr_auto]">
-                <input
-                  className="field"
-                  value={newCategory.name}
-                  onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
-                  placeholder="Nombre (ej. Postres)"
+          {tab === 'menu' && (
+            <div role="tabpanel">
+              {!menu && <p className="text-sm text-muted">Cargando...</p>}
+
+              {menu?.map((c, i) => (
+                <CategoryEditor
+                  key={c.id}
+                  category={c}
+                  defaultOpen={i === 0}
+                  onSaveCategory={saveCategory}
+                  onDeleteCategory={deleteCategory}
+                  onSaveItem={saveItem}
+                  onDeleteItem={deleteItem}
+                  onAddItem={addItem}
+                  onUploadImage={uploadImage}
+                  onRemoveImage={removeImage}
                 />
-                <input
-                  className="field"
-                  value={newCategory.note}
-                  onChange={(e) => setNewCategory({ ...newCategory, note: e.target.value })}
-                  placeholder="Nota (opcional)"
-                />
-                <button className="btn btn-sm" onClick={addCategory}>Agregar</button>
-              </div>
-            </>
+              ))}
+
+              {menu && !addingCategory && (
+                <button
+                  type="button"
+                  onClick={() => setAddingCategory(true)}
+                  className="mt-5 cursor-pointer text-sm font-semibold text-gold hover:text-fire"
+                >
+                  + Nueva categoría
+                </button>
+              )}
+
+              {menu && addingCategory && (
+                <div className="mt-5 grid grid-cols-2 items-center gap-2 rounded-lg border border-dashed border-line p-2.5 sm:grid-cols-[1fr_1fr_auto_auto]">
+                  <input
+                    className="field"
+                    autoFocus
+                    value={newCategory.name}
+                    onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
+                    placeholder="Nombre (ej. Postres)"
+                  />
+                  <input
+                    className="field"
+                    value={newCategory.note}
+                    onChange={(e) => setNewCategory({ ...newCategory, note: e.target.value })}
+                    placeholder="Nota (opcional)"
+                  />
+                  <button className="btn btn-sm" onClick={addCategory}>Agregar</button>
+                  <button className="btn btn-sm btn-ghost" onClick={() => setAddingCategory(false)}>Cancelar</button>
+                </div>
+              )}
+            </div>
           )}
 
-          {gallery && (
-            <GalleryEditor photos={gallery} onUpload={uploadGalleryPhoto} onDelete={deleteGalleryPhoto} />
+          {tab === 'gallery' && (
+            <div role="tabpanel">
+              {!gallery && <p className="text-sm text-muted">Cargando...</p>}
+              {gallery && (
+                <GalleryEditor photos={gallery} onUpload={uploadGalleryPhoto} onDelete={deleteGalleryPhoto} />
+              )}
+            </div>
           )}
         </>
       )}
+
+      {error && <Toast message={error} onDismiss={() => setError('')} />}
     </main>
   )
 }
