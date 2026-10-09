@@ -45,25 +45,38 @@ export default function CategoryEditor({
 
   return (
     <section>
-      <div className="row cat-row">
-        <input value={name} onChange={(e) => setName(e.target.value)} aria-label="Nombre de la categoría" />
-        <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Nota (opcional)" aria-label="Nota" />
-        <button className="btn sm" onClick={saveCategory}>{saved ? '✓' : 'Guardar'}</button>
-        <button className="btn sm" onClick={() => onDeleteCategory(category)}>Borrar</button>
+      <div className="mt-7 grid grid-cols-2 items-center gap-2 sm:grid-cols-[1fr_1fr_auto_auto]">
+        <input
+          className="field font-bold text-gold"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          aria-label="Nombre de la categoría"
+        />
+        <input
+          className="field"
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          placeholder="Nota (opcional)"
+          aria-label="Nota"
+        />
+        <button className="btn btn-sm" onClick={saveCategory}>{saved ? '✓' : 'Guardar'}</button>
+        <button className="btn btn-sm" onClick={() => onDeleteCategory(category)}>Borrar</button>
       </div>
 
       {category.items.map((item) => (
         <ItemRow key={item.id} item={item} onSave={onSaveItem} onDelete={onDeleteItem} />
       ))}
 
-      <div className="row item-row new">
-        <input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Nuevo platillo" />
+      <div className="my-1.5 grid grid-cols-2 items-center gap-2 lg:grid-cols-[1.2fr_1.4fr_110px_auto]">
+        <input className="field" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Nuevo platillo" />
         <input
+          className="field"
           value={newDescription}
           onChange={(e) => setNewDescription(e.target.value)}
           placeholder="Descripción (opcional)"
         />
         <input
+          className="field"
           type="number"
           min={0}
           step={100}
@@ -71,7 +84,7 @@ export default function CategoryEditor({
           onChange={(e) => setNewPrice(e.target.value)}
           placeholder="Precio"
         />
-        <button className="btn sm" onClick={addItem}>Agregar</button>
+        <button className="btn btn-sm" onClick={addItem}>Agregar</button>
       </div>
     </section>
   )

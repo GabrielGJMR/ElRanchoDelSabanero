@@ -20,14 +20,21 @@ export default function LoginForm({ onLogin }: Props) {
   }
 
   return (
-    <form id="login" onSubmit={submit}>
-      <label>
+    <form onSubmit={submit} className="max-w-sm space-y-3">
+      <label className="block text-sm text-muted">
         Usuario
-        <input value={username} onChange={(e) => setUsername(e.target.value)} required autoComplete="username" />
+        <input
+          className="field mt-1"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+          autoComplete="username"
+        />
       </label>
-      <label>
+      <label className="block text-sm text-muted">
         Clave
         <input
+          className="field mt-1"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
@@ -35,8 +42,8 @@ export default function LoginForm({ onLogin }: Props) {
           autoComplete="current-password"
         />
       </label>
-      <button className="btn" type="submit" disabled={busy}>Entrar</button>
-      <p className="note" role="status">{message}</p>
+      <button className="btn w-full" type="submit" disabled={busy}>Entrar</button>
+      <p className="text-sm text-muted" role="status">{message}</p>
     </form>
   )
 }

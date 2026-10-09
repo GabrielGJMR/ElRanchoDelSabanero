@@ -22,15 +22,17 @@ export default function ItemRow({ item, onSave, onDelete }: Props) {
   }
 
   return (
-    <div className="row item-row">
-      <input value={name} onChange={(e) => setName(e.target.value)} aria-label="Nombre del platillo" />
+    <div className="my-1.5 grid grid-cols-2 items-center gap-2 lg:grid-cols-[1.2fr_1.4fr_110px_auto_auto_auto]">
+      <input className="field" value={name} onChange={(e) => setName(e.target.value)} aria-label="Nombre del platillo" />
       <input
+        className="field"
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         placeholder="Descripción (opcional)"
         aria-label="Descripción"
       />
       <input
+        className="field"
         type="number"
         min={0}
         step={100}
@@ -38,11 +40,17 @@ export default function ItemRow({ item, onSave, onDelete }: Props) {
         onChange={(e) => setPrice(e.target.value)}
         aria-label="Precio"
       />
-      <label>
-        <input type="checkbox" checked={available} onChange={(e) => setAvailable(e.target.checked)} /> visible
+      <label className="flex items-center gap-1.5 text-sm whitespace-nowrap text-muted">
+        <input
+          type="checkbox"
+          className="accent-fire"
+          checked={available}
+          onChange={(e) => setAvailable(e.target.checked)}
+        />
+        visible
       </label>
-      <button className="btn sm" onClick={save}>{saved ? '✓' : 'Guardar'}</button>
-      <button className="btn sm" onClick={() => onDelete(item)}>Borrar</button>
+      <button className="btn btn-sm" onClick={save}>{saved ? '✓' : 'Guardar'}</button>
+      <button className="btn btn-sm" onClick={() => onDelete(item)}>Borrar</button>
     </div>
   )
 }

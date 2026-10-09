@@ -84,51 +84,55 @@ export default function Admin() {
   }
 
   return (
-    <div className="admin">
-      <main className="wrap">
-        <h1>Administración del menú</h1>
+    <main className="mx-auto max-w-5xl px-4 py-6">
+      <h1 className="mb-4 text-3xl text-gold">Administración del menú</h1>
 
-        {!auth && <LoginForm onLogin={login} />}
+      {!auth && <LoginForm onLogin={login} />}
 
-        {auth && (
-          <>
-            <p><button className="btn sm" onClick={logout}>Cerrar sesión</button></p>
-            {error && <p className="banner" role="alert">{error}</p>}
-            {!menu && <p className="note">Cargando...</p>}
+      {auth && (
+        <>
+          <p className="mb-4">
+            <button className="btn btn-sm" onClick={logout}>Cerrar sesión</button>
+          </p>
+          {error && (
+            <p className="my-3 rounded-lg border border-fire bg-[#3a1410] px-3.5 py-2.5" role="alert">{error}</p>
+          )}
+          {!menu && <p className="text-sm text-muted">Cargando...</p>}
 
-            {menu?.map((c) => (
-              <CategoryEditor
-                key={c.id}
-                category={c}
-                onSaveCategory={saveCategory}
-                onDeleteCategory={deleteCategory}
-                onSaveItem={saveItem}
-                onDeleteItem={deleteItem}
-                onAddItem={addItem}
-              />
-            ))}
+          {menu?.map((c) => (
+            <CategoryEditor
+              key={c.id}
+              category={c}
+              onSaveCategory={saveCategory}
+              onDeleteCategory={deleteCategory}
+              onSaveItem={saveItem}
+              onDeleteItem={deleteItem}
+              onAddItem={addItem}
+            />
+          ))}
 
-            {menu && (
-              <>
-                <h3>Nueva categoría</h3>
-                <div className="row cat-row">
-                  <input
-                    value={newCategory.name}
-                    onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
-                    placeholder="Nombre (ej. Postres)"
-                  />
-                  <input
-                    value={newCategory.note}
-                    onChange={(e) => setNewCategory({ ...newCategory, note: e.target.value })}
-                    placeholder="Nota (opcional)"
-                  />
-                  <button className="btn sm" onClick={addCategory}>Agregar</button>
-                </div>
-              </>
-            )}
-          </>
-        )}
-      </main>
-    </div>
+          {menu && (
+            <>
+              <h2 className="mt-8 mb-1.5 text-lg text-gold">Nueva categoría</h2>
+              <div className="grid grid-cols-2 items-center gap-2 sm:grid-cols-[1fr_1fr_auto]">
+                <input
+                  className="field"
+                  value={newCategory.name}
+                  onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
+                  placeholder="Nombre (ej. Postres)"
+                />
+                <input
+                  className="field"
+                  value={newCategory.note}
+                  onChange={(e) => setNewCategory({ ...newCategory, note: e.target.value })}
+                  placeholder="Nota (opcional)"
+                />
+                <button className="btn btn-sm" onClick={addCategory}>Agregar</button>
+              </div>
+            </>
+          )}
+        </>
+      )}
+    </main>
   )
 }
