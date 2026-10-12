@@ -5,6 +5,8 @@ import com.ranchosabanero.backend.dto.GalleryPhotoResponse;
 import com.ranchosabanero.backend.dto.ItemRequest;
 import com.ranchosabanero.backend.dto.MenuCategoryResponse;
 import com.ranchosabanero.backend.dto.MenuItemResponse;
+import com.ranchosabanero.backend.dto.MenuRequest;
+import com.ranchosabanero.backend.dto.MenuResponse;
 import com.ranchosabanero.backend.service.GalleryService;
 import com.ranchosabanero.backend.service.MenuService;
 import jakarta.validation.Valid;
@@ -25,11 +27,40 @@ public class AdminController {
     private final MenuService menuService;
     private final GalleryService galleryService;
 
-    /** Menú completo, incluidos los platillos desactivados. También sirve para comprobar el login. */
-    @GetMapping("/menu")
-    public List<MenuCategoryResponse> menu() {
-        return menuService.menu(false);
+    // ---- Tipos de menú ----
+    // Elegir el menú es el primer paso tras iniciar sesión: GET /menus también sirve para
+    // comprobar el login (si el usuario/clave son válidos, aunque todavía no haya menús).
+
+    @GetMapping("/menus")
+    public List<MenuResponse> menus() {
+        return menuService.listMenus();
     }
+
+    @PostMapping("/menus")
+    @ResponseStatus(HttpStatus.CREATED)
+    public MenuResponse createMenu(@Valid @RequestBody MenuRequest request) {
+        return menuService.createMenu(request);
+    }
+
+    @PutMapping("/menus/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void renameMenu(@PathVariable Long id, @Valid @RequestBody MenuRequest request) {
+        menuService.renameMenu(id, request);
+    }
+
+    @DeleteMapping("/menus/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteMenu(@PathVariable Long id) {
+        menuService.deleteMenu(id);
+    }
+
+    /** Categorías (incluidos los platillos desactivados) de un solo tipo de menú. */
+    @GetMapping("/menus/{menuId}/categories")
+    public List<MenuCategoryResponse> categoriesForMenu(@PathVariable Long menuId) {
+        return menuService.categoriesForMenu(menuId, false, "es");
+    }
+
+    // ---- Categorías ----
 
     @PostMapping("/categories")
     @ResponseStatus(HttpStatus.CREATED)

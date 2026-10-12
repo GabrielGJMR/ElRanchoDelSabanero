@@ -38,7 +38,7 @@
     }
   }
   body {
-    @apply bg-page font-body text-base leading-relaxed text-ink;
+    @apply overflow-x-hidden bg-page font-body text-base leading-relaxed text-ink;
   }
   a {
     @apply text-gold;
@@ -50,14 +50,59 @@
 }
 
 @layer components {
+  /*
+    Muesca en la esquina inferior izquierda (como un sello o cartel tallado) en vez del
+    rectángulo con bordes redondeados de cualquier plantilla. La sombra sólida (sin
+    difuminar) "levanta" el botón y se aplana al presionarlo, como un botón físico.
+
+    La forma recortada vive en ::before (no en el elemento real) a propósito: clip-path
+    recorta también el outline del :focus-visible, y el botón real es lo que recibe el
+    foco. Así el anillo de foco sale completo, sin que la muesca se lo coma.
+  */
   .btn {
-    @apply inline-flex min-h-11 cursor-pointer items-center justify-center rounded-sm border border-fire bg-fire px-6 py-2.5 text-sm font-bold tracking-wider text-white uppercase no-underline transition-colors hover:border-fire-dark hover:bg-fire-dark disabled:cursor-not-allowed disabled:opacity-60;
+    @apply isolate relative inline-flex min-h-11 cursor-pointer items-center justify-center
+      px-6 py-2.5 text-sm font-bold tracking-wider text-white uppercase no-underline
+      transition-transform duration-150 ease-out
+      hover:-translate-y-0.5 active:translate-y-0
+      disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+  .btn::before {
+    content: '';
+    @apply absolute inset-0 -z-10 border-2 border-fire bg-fire
+      shadow-[0_3px_0_0_var(--color-fire-dark)]
+      transition-[background-color,border-color,box-shadow] duration-150 ease-out
+      [clip-path:polygon(0_0,100%_0,100%_100%,12px_100%,0_calc(100%-12px))];
+  }
+  .btn:hover::before {
+    @apply border-fire-dark bg-fire-dark shadow-[0_4px_0_0_var(--color-fire-dark)];
+  }
+  .btn:active::before {
+    @apply shadow-[0_1px_0_0_var(--color-fire-dark)];
+  }
+  .btn:disabled::before {
+    @apply shadow-none;
   }
   .btn-ghost {
-    @apply border-ember bg-transparent text-ember hover:border-ember hover:bg-ember hover:text-page;
+    @apply text-ember hover:text-page;
+  }
+  .btn-ghost::before {
+    @apply border-ember bg-transparent shadow-[0_3px_0_0_var(--color-ember)];
+  }
+  .btn-ghost:hover::before {
+    @apply border-ember bg-ember shadow-[0_4px_0_0_var(--color-ember)];
+  }
+  .btn-ghost:active::before {
+    @apply shadow-[0_1px_0_0_var(--color-ember)];
   }
   .btn-sm {
     @apply min-h-9 px-3.5 py-1.5 text-xs;
+  }
+  .btn-sm::before {
+    @apply [clip-path:polygon(0_0,100%_0,100%_100%,8px_100%,0_calc(100%-8px))];
+  }
+  /* Para las llamadas a la acción principales (portada, cierre): usa la misma fuente de los títulos. */
+  .btn-display {
+    @apply font-display text-base font-normal tracking-wide normal-case;
   }
   .field {
     @apply w-full rounded-md border border-line bg-[#120e0b] p-2.5 text-ink placeholder:text-muted/60;

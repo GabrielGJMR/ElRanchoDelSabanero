@@ -33,21 +33,30 @@ class MenuApiTests {
 
     @Test
     void adminRoutesRequireLogin() throws Exception {
-        mvc.perform(get("/api/admin/menu")).andExpect(status().isUnauthorized());
-        mvc.perform(get("/api/admin/menu").with(httpBasic("admin", "mala"))).andExpect(status().isUnauthorized());
-        mvc.perform(get("/api/admin/menu").with(httpBasic("admin", "clave-de-prueba"))).andExpect(status().isOk());
+        mvc.perform(get("/api/admin/menus")).andExpect(status().isUnauthorized());
+        mvc.perform(get("/api/admin/menus").with(httpBasic("admin", "mala"))).andExpect(status().isUnauthorized());
+        mvc.perform(get("/api/admin/menus").with(httpBasic("admin", "clave-de-prueba"))).andExpect(status().isOk());
     }
 
     @Test
     void adminCanCreateEditHideAndDeleteItems() throws Exception {
         var admin = httpBasic("admin", "clave-de-prueba");
 
+        // Menú propio para esta prueba: no depende del orden de /api/admin/menus (que ya trae
+        // los menús sembrados, incluido "Eventos", que no sale en la carta pública).
+        String menuId = mvc.perform(post("/api/admin/menus").with(admin).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Menú de prueba\"}"))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString()
+                .replaceAll(".*\"id\":(\\d+).*", "$1");
+
         mvc.perform(post("/api/admin/categories").with(admin).contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"Postres\"}"))
+                        .content("{\"menuId\":" + menuId + ",\"name\":\"Postres\"}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("Postres"));
 
-        String catId = mvc.perform(get("/api/admin/menu").with(admin)).andReturn().getResponse().getContentAsString()
+        String catId = mvc.perform(get("/api/admin/menus/" + menuId + "/categories").with(admin))
+                .andReturn().getResponse().getContentAsString()
                 .replaceAll("(?s).*\\{\"id\":(\\d+),\"name\":\"Postres\".*", "$1");
 
         String body = mvc.perform(post("/api/admin/items").with(admin).contentType(MediaType.APPLICATION_JSON)
@@ -65,6 +74,24 @@ class MenuApiTests {
 
         mvc.perform(delete("/api/admin/items/" + itemId).with(admin)).andExpect(status().isNoContent());
         mvc.perform(delete("/api/admin/items/" + itemId).with(admin)).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void eventsMenuHasOwnPublicPageAndIsHiddenFromMainMenu() throws Exception {
+        var admin = httpBasic("admin", "clave-de-prueba");
+
+        String eventsId = mvc.perform(get("/api/admin/menus").with(admin)).andReturn().getResponse().getContentAsString()
+                .replaceAll("(?s).*\\{\"id\":(\\d+),\"name\":\"Eventos\"\\}.*", "$1");
+
+        mvc.perform(post("/api/admin/categories").with(admin).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"menuId\":" + eventsId + ",\"name\":\"Paquetes de cumpleaños\"}"))
+                .andExpect(status().isCreated());
+
+        mvc.perform(get("/api/menu"))
+                .andExpect(jsonPath("$[?(@.name=='Paquetes de cumpleaños')]").isEmpty());
+        mvc.perform(get("/api/menu/eventos"))
+                .andExpect(jsonPath("$[?(@.name=='Paquetes de cumpleaños')]").exists());
+        mvc.perform(get("/api/menu/no-existe")).andExpect(status().isNotFound());
     }
 
     @Test
@@ -89,7 +116,7 @@ class MenuApiTests {
                         .file(new MockMultipartFile("file", "foto.png", "image/png", png.toByteArray()))
                         .with(admin))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.imageUrl").value(org.hamcrest.Matchers.startsWith("https://res.cloudinary.com/")))
+                .andExpect(jsonPath("$.imageUrl").value(org.hamcrest.Matchers.startsWith("/uploads/")))
                 .andReturn().getResponse().getContentAsString();
         String url = body.replaceAll(".*\"imageUrl\":\"([^\"]+)\".*", "$1");
 
@@ -126,7 +153,7 @@ class MenuApiTests {
                         .file(new MockMultipartFile("file", "local.png", "image/png", png.toByteArray()))
                         .with(admin))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.url").value(org.hamcrest.Matchers.startsWith("https://res.cloudinary.com/")))
+                .andExpect(jsonPath("$.url").value(org.hamcrest.Matchers.startsWith("/uploads/")))
                 .andReturn().getResponse().getContentAsString();
         String id = body.replaceAll(".*\"id\":(\\d+).*", "$1");
 

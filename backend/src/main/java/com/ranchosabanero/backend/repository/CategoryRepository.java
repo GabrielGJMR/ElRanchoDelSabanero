@@ -7,7 +7,14 @@ import java.util.List;
 
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
-    List<Category> findAllByOrderByPositionAscIdAsc();
+    /**
+     * Para el menú público (la carta general): solo los menús sin slug propio, es decir los que
+     * todavía no tienen su propia página (ver Menu.slug). Agrupa por menú primero, para que las
+     * categorías de cada uno queden juntas.
+     */
+    List<Category> findAllByMenuSlugIsNullOrderByMenuIdAscPositionAscIdAsc();
 
-    int countByIdNotNull();
+    List<Category> findAllByMenuIdOrderByPositionAscIdAsc(Long menuId);
+
+    int countByMenuId(Long menuId);
 }

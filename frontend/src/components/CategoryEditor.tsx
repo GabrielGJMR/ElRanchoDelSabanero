@@ -1,5 +1,5 @@
 import { useId, useState } from 'react'
-import type { Category, CategoryInput, ItemInput, MenuItem } from '../api.ts'
+import type { Category, ItemInput, MenuItem } from '../api.ts'
 import ItemRow from './ItemRow.tsx'
 
 interface Props {
@@ -8,7 +8,8 @@ interface Props {
   items?: MenuItem[]
   open: boolean
   onToggle: () => void
-  onSaveCategory: (id: number, data: CategoryInput) => Promise<boolean>
+  /** El menú al que pertenece la categoría lo agrega quien llama; aquí solo se edita nombre/nota. */
+  onSaveCategory: (id: number, data: { name: string; note: string }) => Promise<boolean>
   onDeleteCategory: (category: Category) => Promise<void>
   onSaveItem: (id: number, data: ItemInput) => Promise<boolean>
   onDeleteItem: (item: MenuItem) => Promise<void>

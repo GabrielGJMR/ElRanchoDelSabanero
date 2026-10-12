@@ -23,8 +23,15 @@ export interface ItemInput {
 }
 
 export interface CategoryInput {
+  menuId: number
   name: string
   note: string
+}
+
+/** Uno de los tipos de menú (p.ej. "Menú 1", "Menú 2", "Menú 3"); cada uno agrupa sus propias categorías. */
+export interface MenuType {
+  id: number
+  name: string
 }
 
 export interface GalleryPhoto {
@@ -41,8 +48,13 @@ async function parse<T>(res: Response): Promise<T> {
   return data as T
 }
 
-export async function fetchMenu(): Promise<Category[]> {
-  return parse(await fetch('/api/menu'))
+export async function fetchMenu(lang = 'es'): Promise<Category[]> {
+  return parse(await fetch('/api/menu?lang=' + encodeURIComponent(lang)))
+}
+
+/** Menú con página propia (por ahora solo "eventos"). */
+export async function fetchMenuBySlug(slug: string, lang = 'es'): Promise<Category[]> {
+  return parse(await fetch(`/api/menu/${slug}?lang=${encodeURIComponent(lang)}`))
 }
 
 export async function fetchGallery(): Promise<GalleryPhoto[]> {

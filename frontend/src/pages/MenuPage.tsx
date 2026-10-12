@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { fetchMenu, type Category } from '../api.ts'
 import PageHeader from '../components/PageHeader.tsx'
 import PhotoFrame from '../components/PhotoFrame.tsx'
@@ -6,14 +7,26 @@ import { colones, normalize } from '../format.ts'
 import { usePageTitle } from '../usePageTitle.ts'
 
 export default function MenuPage() {
-  usePageTitle('La carta')
+  const { t, i18n } = useTranslation()
+  usePageTitle(t('menuPage.pageTitle'))
   const [menu, setMenu] = useState<Category[] | null>(null)
   const [failed, setFailed] = useState(false)
   const [query, setQuery] = useState('')
 
   useEffect(() => {
-    fetchMenu().then(setMenu).catch(() => setFailed(true))
-  }, [])
+    let active = true
+    fetchMenu(i18n.language).then((data) => {
+      if (active) {
+        setMenu(data)
+        setFailed(false)
+      }
+    }).catch(() => {
+      if (active) setFailed(true)
+    })
+    return () => {
+      active = false
+    }
+  }, [i18n.language])
 
   const q = normalize(query)
   const categories = (menu ?? [])
@@ -25,10 +38,7 @@ export default function MenuPage() {
 
   return (
     <>
-      <PageHeader
-        title="La carta"
-        subtitle="2 acompañamientos a elegir: ensalada criolla, arroz blanco, papas fritas, patacones, yuca frita, vegetales salteados o papas mini."
-      />
+      <PageHeader title={t('menuPage.title')} subtitle={t('menuPage.subtitle')} />
 
       <div className="paper min-h-[60vh]">
         <div className="sticky top-[65px] z-10 border-b border-paper-line bg-paper/95 backdrop-blur">
@@ -45,8 +55,8 @@ export default function MenuPage() {
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Buscar en la carta (ej. pollo, patacones)"
-                aria-label="Buscar platillos"
+                placeholder={t('menuPage.searchPlaceholder')}
+                aria-label={t('menuPage.searchAria')}
                 className="min-h-9 w-full rounded-sm border border-paper-line bg-paper-2/60 py-1.5 pr-3 pl-9 text-sm text-paper-ink placeholder:text-paper-muted focus-visible:outline-none"
               />
             </div>
@@ -54,7 +64,7 @@ export default function MenuPage() {
             {!q && (
               <div
                 className="mt-2 flex gap-2 overflow-x-auto sm:justify-center"
-                aria-label="Categorías de la carta"
+                aria-label={t('menuPage.categoriesAria')}
               >
                 {categories.map((c) => (
                   <a
@@ -71,10 +81,10 @@ export default function MenuPage() {
         </div>
 
         <div className="mx-auto max-w-3xl px-4 pt-6 pb-16">
-          {failed && <p className="py-10 text-center text-paper-muted">No se pudo cargar la carta. Intente de nuevo en unos minutos.</p>}
-          {!menu && !failed && <p className="py-10 text-center text-paper-muted">Cargando la carta...</p>}
+          {failed && <p className="py-10 text-center text-paper-muted">{t('menuPage.loadFailed')}</p>}
+          {!menu && !failed && <p className="py-10 text-center text-paper-muted">{t('menuPage.loading')}</p>}
           {menu && !failed && q && categories.length === 0 && (
-            <p className="py-10 text-center text-paper-muted">No encontramos nada con "{query}".</p>
+            <p className="py-10 text-center text-paper-muted">{t('menuPage.noResults', { query })}</p>
           )}
 
           {categories.map((c) => (
@@ -90,7 +100,7 @@ export default function MenuPage() {
                   <li key={it.id} className="flex gap-4 border-b border-paper-line/70 py-4">
                     <PhotoFrame
                       src={it.imageUrl}
-                      alt={it.imageUrl ? it.name : `Foto de ${it.name} (próximamente)`}
+                      alt={it.imageUrl ? it.name : t('menuPage.photoComingSoon', { name: it.name })}
                       tone="paper"
                       className="size-20 shrink-0 rounded-sm sm:size-24"
                     />
@@ -108,7 +118,7 @@ export default function MenuPage() {
             </section>
           ))}
 
-          <p className="mt-10 text-center text-sm text-paper-muted">Los precios no incluyen I.V.A.</p>
+          <p className="mt-10 text-center text-sm text-paper-muted">{t('menuPage.priceNote')}</p>
         </div>
       </div>
     </>
