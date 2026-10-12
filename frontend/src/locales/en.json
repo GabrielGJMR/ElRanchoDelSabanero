@@ -1,0 +1,93 @@
+{
+  "meta": {
+    "homeTagline": "Restaurant in Liberia, Guanacaste"
+  },
+  "nav": {
+    "aria": "Site pages",
+    "home": "Home",
+    "menu": "Menu",
+    "events": "Events",
+    "location": "Location",
+    "contact": "Contact",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
+  },
+  "footer": {
+    "menu": "Menu",
+    "events": "Events",
+    "location": "Location",
+    "contact": "Contact"
+  },
+  "hero": {
+    "locationTag": "Liberia, Guanacaste",
+    "tagline": "Our specialty is making you happy.",
+    "description": "Chicken, burgers, patacones and platters to share. Every dish comes with 2 side dishes of your choice.",
+    "ctaMenu": "View the menu",
+    "ctaLocation": "Get directions",
+    "logoAlt": "El Rancho del Sabanero crest"
+  },
+  "specialties": {
+    "heading": "What you'll find here",
+    "viewFullMenu": "See the full menu →",
+    "dishes": [
+      { "title": "House specials", "text": "Patacones La Burrita, Tayuya and the La Patrona Salad." },
+      { "title": "Burgers", "text": "Criolla, Juanita, Smash Burger Tajona and the Carreta sin Bueyes." },
+      { "title": "Chicken", "text": "Gordon Blue, fillet with garlic sauce, grilled or pan-seared, and classic or jalapeño fajitas." },
+      { "title": "Sharing platters", "text": "El Peón, for 5 people. El Gamonal, for 8." }
+    ]
+  },
+  "gallery": {
+    "heading": "This is our rancho",
+    "photoAlt": "Photo of the restaurant {{n}}",
+    "placeholderAlt": "Reserved space for a photo of the restaurant",
+    "placeholderText": "Photo of the restaurant"
+  },
+  "home": {
+    "closing": "We'll be waiting for you in Liberia",
+    "ctaLocation": "Get directions",
+    "ctaContact": "Contact"
+  },
+  "menuPage": {
+    "pageTitle": "Menu",
+    "title": "Menu",
+    "subtitle": "Choose 2 side dishes: creole salad, white rice, french fries, patacones, fried cassava, sautéed vegetables or mini potatoes.",
+    "searchPlaceholder": "Search the menu (e.g. chicken, patacones)",
+    "searchAria": "Search dishes",
+    "categoriesAria": "Menu categories",
+    "loadFailed": "The menu could not be loaded. Please try again in a few minutes.",
+    "loading": "Loading the menu...",
+    "noResults": "We couldn't find anything for \"{{query}}\".",
+    "photoComingSoon": "Photo of {{name}} (coming soon)",
+    "priceNote": "Prices do not include tax."
+  },
+  "eventsPage": {
+    "pageTitle": "Events",
+    "title": "Events",
+    "subtitle": "Birthday and celebration packages: inflatables, venue and more. Message us to customize yours.",
+    "searchPlaceholder": "Search events (e.g. birthday, inflatable)",
+    "searchAria": "Search event packages",
+    "categoriesAria": "Event categories",
+    "loadFailed": "The events info could not be loaded. Please try again in a few minutes.",
+    "loading": "Loading events...",
+    "empty": "No packages published yet. Message us for more information.",
+    "noResults": "We couldn't find anything for \"{{query}}\".",
+    "photoComingSoon": "Photo of {{name}} (coming soon)",
+    "priceNote": "Prices may vary by group size. Ask about availability."
+  },
+  "locationPage": {
+    "pageTitle": "Location",
+    "title": "Location",
+    "mapTitle": "Map of {{name}}",
+    "openInMaps": "Open in Google Maps"
+  },
+  "contactPage": {
+    "pageTitle": "Contact",
+    "title": "Contact",
+    "callUs": "Call us",
+    "whatsappLabel": "WhatsApp",
+    "whatsappCta": "Send us a message",
+    "instagramLabel": "Instagram",
+    "facebookLabel": "Facebook",
+    "facebookName": "El Rancho del Sabanero"
+  }
+}

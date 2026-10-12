@@ -1,0 +1,93 @@
+{
+  "meta": {
+    "homeTagline": "位于利贝里亚瓜纳卡斯特的餐厅"
+  },
+  "nav": {
+    "aria": "网站页面",
+    "home": "首页",
+    "menu": "菜单",
+    "events": "活动",
+    "location": "位置",
+    "contact": "联系方式",
+    "openMenu": "打开菜单",
+    "closeMenu": "关闭菜单"
+  },
+  "footer": {
+    "menu": "菜单",
+    "events": "活动",
+    "location": "位置",
+    "contact": "联系方式"
+  },
+  "hero": {
+    "locationTag": "利贝里亚, 瓜纳卡斯特",
+    "tagline": "我们的专长就是让您开心。",
+    "description": "鸡肉、汉堡、油炸大蕉片和可分享的拼盘。每道菜均可选配2种配菜。",
+    "ctaMenu": "查看菜单",
+    "ctaLocation": "查看路线",
+    "logoAlt": "El Rancho del Sabanero 徽标"
+  },
+  "specialties": {
+    "heading": "这里有什么好吃的",
+    "viewFullMenu": "查看完整菜单 →",
+    "dishes": [
+      { "title": "招牌菜", "text": "La Burrita 油炸大蕉片、Tayuya 和 La Patrona 沙拉。" },
+      { "title": "汉堡", "text": "Criolla、Juanita、Smash Burger Tajona 和 Carreta sin Bueyes。" },
+      { "title": "鸡肉", "text": "Gordon Blue、蒜香/烤制/煎制鸡排,以及经典或哈拉皮诺法希达。" },
+      { "title": "拼盘", "text": "El Peón,5人份。El Gamonal,8人份。" }
+    ]
+  },
+  "gallery": {
+    "heading": "这就是我们的餐厅",
+    "photoAlt": "餐厅照片 {{n}}",
+    "placeholderAlt": "餐厅照片预留位置",
+    "placeholderText": "餐厅照片"
+  },
+  "home": {
+    "closing": "我们在利贝里亚等您",
+    "ctaLocation": "查看路线",
+    "ctaContact": "联系方式"
+  },
+  "menuPage": {
+    "pageTitle": "菜单",
+    "title": "菜单",
+    "subtitle": "可选2种配菜:criolla沙拉、白米饭、炸薯条、油炸大蕉片、炸木薯、炒蔬菜或迷你薯仔。",
+    "searchPlaceholder": "搜索菜单(例如:鸡肉、大蕉片)",
+    "searchAria": "搜索菜品",
+    "categoriesAria": "菜单分类",
+    "loadFailed": "无法加载菜单,请几分钟后再试。",
+    "loading": "正在加载菜单...",
+    "noResults": "没有找到与\"{{query}}\"匹配的内容。",
+    "photoComingSoon": "{{name}} 的照片(即将上线)",
+    "priceNote": "价格不含增值税。"
+  },
+  "eventsPage": {
+    "pageTitle": "活动",
+    "title": "活动",
+    "subtitle": "生日和庆祝套餐:充气城堡、场地等。请联系我们定制您的活动。",
+    "searchPlaceholder": "搜索活动(例如:生日、充气城堡)",
+    "searchAria": "搜索活动套餐",
+    "categoriesAria": "活动分类",
+    "loadFailed": "无法加载活动信息,请几分钟后再试。",
+    "loading": "正在加载活动...",
+    "empty": "暂无已发布的套餐,请联系我们了解更多信息。",
+    "noResults": "没有找到与\"{{query}}\"匹配的内容。",
+    "photoComingSoon": "{{name}} 的照片(即将上线)",
+    "priceNote": "价格可能因团体人数而异,请咨询具体安排。"
+  },
+  "locationPage": {
+    "pageTitle": "位置",
+    "title": "位置",
+    "mapTitle": "{{name}} 的地图",
+    "openInMaps": "在 Google 地图中打开"
+  },
+  "contactPage": {
+    "pageTitle": "联系方式",
+    "title": "联系方式",
+    "callUs": "致电我们",
+    "whatsappLabel": "WhatsApp",
+    "whatsappCta": "给我们发消息",
+    "instagramLabel": "Instagram",
+    "facebookLabel": "Facebook",
+    "facebookName": "El Rancho del Sabanero"
+  }
+}
