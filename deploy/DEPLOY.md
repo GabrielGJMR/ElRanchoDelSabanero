@@ -1,120 +1,82 @@
-# Despliegue en un VPS (Ubuntu 22.04 / 24.04)
+# Despliegue en un VPS (Docker Compose)
 
-Todo el sitio (web de React + API) sale en **un solo archivo `backend.jar`**. Nginx recibe el tráfico
-de internet con HTTPS y se lo pasa al jar, que escucha solo en `127.0.0.1:8080`. Los datos viven en PostgreSQL.
+Todo corre en contenedores Docker en el mismo VPS: Postgres, el backend (API + fotos subidas), LibreTranslate
+(traduce el menú a inglés/francés/chino), el frontend (web de React servida por Nginx) y Caddy como reverse
+proxy con HTTPS automático (Let's Encrypt). No se usa ningún servicio externo de pago: ni Cloudinary, ni S3,
+ni Supabase, ni una API de traducción de pago.
 
 ```
-Internet ──HTTPS──> Nginx (80/443) ──> backend.jar (127.0.0.1:8080) ──> PostgreSQL (localhost)
+Internet ──HTTPS──> Caddy (80/443) ──┬─> backend (Postgres como base de datos, fotos en su propio volumen)
+                                      │     └─> libretranslate (solo red interna, traduce el menú)
+                                      └─> frontend (Nginx, web estática de React)
 ```
 
 ## 0. Antes de empezar
-- Un VPS con Ubuntu, acceso por SSH y 1 GB de RAM como mínimo.
+- Un VPS con Docker y Docker Compose instalados, 2 GB de RAM como mínimo (el servicio de traducción
+  automática del menú, LibreTranslate, necesita memoria adicional para sus modelos de idioma).
 - Un dominio con el registro DNS tipo **A** (`tudominio.com` y `www`) apuntando a la IP del VPS.
-- Una cuenta de [Cloudinary](https://cloudinary.com) (gratis): ahí se guardan las fotos de los platillos
-  y de la galería del local, no en el VPS. Copie Cloud name, API Key y API Secret del Dashboard.
 
-## 1. Preparar el servidor (una sola vez)
+## 1. Instalar Docker (una sola vez)
 ```bash
-sudo apt update && sudo apt upgrade -y
-sudo apt install -y openjdk-21-jre-headless postgresql nginx certbot python3-certbot-nginx ufw
-
-# Firewall: solo SSH y web
-sudo ufw allow OpenSSH && sudo ufw allow 'Nginx Full' && sudo ufw enable
+curl -fsSL https://get.docker.com | sudo sh
+sudo usermod -aG docker "$USER"   # cierre sesión y vuelva a entrar para que aplique
 ```
 
-## 2. Base de datos
+## 2. Copiar el proyecto y configurar variables
 ```bash
-sudo -u postgres psql
+git clone <su-repo> /opt/rancho
+cd /opt/rancho
+cp .env.example .env
+nano .env   # DOMAIN, DB_PASSWORD, ADMIN_USER, ADMIN_PASSWORD, BACKUP_KEEP_DAYS
 ```
-```sql
-CREATE USER rancho WITH PASSWORD 'UNA-CLAVE-LARGA-Y-UNICA';
-CREATE DATABASE rancho OWNER rancho;
-\q
-```
-Las tablas y el menú inicial los crea la aplicación sola al arrancar (Flyway).
+Use claves largas y únicas para `DB_PASSWORD` y `ADMIN_PASSWORD` (no las del ejemplo).
 
-## 3. Usuario y variables secretas
+## 3. Construir y arrancar todo
 ```bash
-sudo useradd --system --home /opt/rancho --shell /usr/sbin/nologin rancho
-sudo mkdir -p /opt/rancho && sudo chown -R rancho:rancho /opt/rancho
-sudo nano /etc/rancho.env
+docker compose up -d --build
+docker compose ps        # los 6 servicios deben decir "Up" (healthy en el caso de db)
+docker compose logs -f backend   # ver los logs del backend
 ```
-Contenido de `/etc/rancho.env` (use sus propias claves):
-```
-SPRING_PROFILES_ACTIVE=prod
-DB_URL=jdbc:postgresql://localhost:5432/rancho
-DB_USER=rancho
-DB_PASSWORD=UNA-CLAVE-LARGA-Y-UNICA
-ADMIN_USER=admin
-ADMIN_PASSWORD=OTRA-CLAVE-LARGA-PARA-EL-PANEL
-CLOUDINARY_CLOUD_NAME=su-cloud-name
-CLOUDINARY_API_KEY=su-api-key
-CLOUDINARY_API_SECRET=su-api-secret
-```
-```bash
-sudo chmod 600 /etc/rancho.env
-```
-En producción la aplicación **no arranca** si falta `ADMIN_PASSWORD` o cualquiera de las 3 variables de Cloudinary.
+Flyway crea las tablas y el menú inicial solo, la primera vez que arranca el backend.
 
-## 4. Construir el jar (en su computadora)
-```bash
-cd frontend && npm ci && npm run build      # genera la web en frontend/dist
-cd ../backend && ./mvnw -DskipTests package # empaqueta todo en backend/target/backend-0.0.1-SNAPSHOT.jar
-```
-El orden importa: si no construye primero el frontend, el jar sale sin la web.
+La primera vez que arranca, `libretranslate` descarga sus modelos de idioma (es/en/fr/zh, ~1-2 GB en total),
+lo que puede tardar varios minutos según la conexión del VPS; mientras tanto el menú público simplemente se
+muestra en español (sin traducciones todavía). Puede ver el progreso con
+`docker compose logs -f libretranslate`. Es un servicio self-hosted: no necesita cuenta, API key, ni tiene
+costo por uso; tampoco expone ningún puerto a internet, solo es alcanzable desde el backend dentro de la red
+interna de Docker.
 
-## 5. Subir y arrancar
-```bash
-scp backend/target/backend-0.0.1-SNAPSHOT.jar usuario@IP_DEL_VPS:/tmp/backend.jar
-scp deploy/rancho.service deploy/nginx-rancho.conf usuario@IP_DEL_VPS:/tmp/
-```
-En el servidor:
-```bash
-sudo mv /tmp/backend.jar /opt/rancho/backend.jar && sudo chown rancho:rancho /opt/rancho/backend.jar
-sudo mv /tmp/rancho.service /etc/systemd/system/rancho.service
-sudo systemctl daemon-reload && sudo systemctl enable --now rancho
-sudo systemctl status rancho          # debe decir "active (running)"
-journalctl -u rancho -f               # ver los logs
-```
+Caddy pide el certificado de Let's Encrypt automáticamente la primera vez que alguien visita el dominio
+por HTTPS (no hace falta correr certbot a mano). Listo: `https://tudominio.com`, panel en `/admin`.
 
-## 6. Nginx y HTTPS
-Edite `nginx-rancho.conf` y cambie `tudominio.com` por su dominio. Agregue esta línea en el bloque `http { }`
-de `/etc/nginx/nginx.conf` (define el límite de intentos para el panel):
-```
-limit_req_zone $binary_remote_addr zone=rancho_admin:10m rate=10r/m;
-```
-```bash
-sudo mv /tmp/nginx-rancho.conf /etc/nginx/sites-available/rancho
-sudo ln -s /etc/nginx/sites-available/rancho /etc/nginx/sites-enabled/rancho
-sudo rm -f /etc/nginx/sites-enabled/default
-sudo nginx -t && sudo systemctl reload nginx
-sudo certbot --nginx -d tudominio.com -d www.tudominio.com   # certificado HTTPS gratis, se renueva solo
-```
-Listo: https://tudominio.com y el panel en https://tudominio.com/admin
+> El panel envía la clave en cada petición (HTTP Basic). Es seguro **solo con HTTPS**, que es lo que Caddy
+> ya provee.
 
-> El panel envía la clave en cada petición (HTTP Basic). Es seguro **solo con HTTPS**, así que no lo use
-> por `http://` ni sin el paso de Certbot.
-
-## 7. Actualizar el sitio
-Repita el paso 4, suba el jar y reinicie:
+## 4. Actualizar el sitio
 ```bash
-scp backend/target/backend-0.0.1-SNAPSHOT.jar usuario@IP_DEL_VPS:/tmp/backend.jar
-ssh usuario@IP_DEL_VPS 'sudo mv /tmp/backend.jar /opt/rancho/backend.jar && sudo chown rancho:rancho /opt/rancho/backend.jar && sudo systemctl restart rancho'
+cd /opt/rancho
+git pull
+docker compose up -d --build
 ```
-El menú y los precios que editó en el panel **no se pierden**: están en PostgreSQL, no en el jar. Las fotos
-(platillos y galería del local) tampoco: están en Cloudinary, fuera del VPS y del jar.
+El menú, los precios y las fotos que suba desde el panel **no se pierden**: viven en los volúmenes nombrados
+`db_data` y `uploads`, no en las imágenes de Docker, así que sobreviven a `--build` y a reinicios del VPS.
 
-## 8. Copias de seguridad
+## 5. Copias de seguridad
+El servicio `backup` corre `pg_dump` de la base de datos cada 24 h (configurable con `BACKUP_INTERVAL_SECONDS`)
+y guarda los `.sql.gz` en `./backups` en el VPS (fuera del volumen de Docker), borrando los de más de
+`BACKUP_KEEP_DAYS` días. Para forzar un respaldo manual:
 ```bash
-sudo -u postgres pg_dump rancho | gzip > rancho-$(date +%F).sql.gz
+docker compose exec backup sh -c 'pg_dump | gzip > /backups/manual-$(date +%F).sql.gz'
 ```
-Las fotos ya están respaldadas por Cloudinary; no hace falta copiarlas aparte. Programe el respaldo de la
-base de datos con `cron` y guarde las copias fuera del VPS.
+Copie `./backups` fuera del VPS de tanto en tanto (otro servidor, almacenamiento propio, etc.) — este
+proyecto evita servicios externos de pago, pero un respaldo que solo vive en el mismo VPS no protege contra
+la pérdida del VPS. Las fotos (volumen `uploads`) no tienen respaldo automático todavía: si quiere
+respaldarlas, agregue `./backups/uploads` como destino de un `tar` periódico del volumen, o inclúyalas en
+el mismo respaldo que use para `db_data`.
 
 ## Checklist rápido
-- [ ] DNS apunta a la IP del VPS
-- [ ] Claves de `/etc/rancho.env` únicas y largas (no las de este ejemplo)
-- [ ] Cuenta de Cloudinary creada y las 3 variables `CLOUDINARY_*` definidas
-- [ ] `https://` funciona y `http://` redirige
+- [ ] DNS apunta a la IP del VPS (A record para `tudominio.com` y `www`)
+- [ ] `.env` tiene claves únicas y largas (no las del `.env.example`)
+- [ ] `https://` funciona y el panel pide usuario/clave
 - [ ] Mapa de Google actualizado en `frontend/src/config.ts` (`mapsEmbed`) antes de construir
-- [ ] Copia de seguridad de la base de datos programada
+- [ ] Respaldo de `./backups` copiado fuera del VPS periódicamente

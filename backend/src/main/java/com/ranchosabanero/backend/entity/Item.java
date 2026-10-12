@@ -25,6 +25,20 @@ public class Item {
 
     private String description;
 
+    /** Traducciones automáticas (ver TranslationService); NULL si aún no se tradujo o el servicio no respondió. */
+    @Column(name = "name_en")
+    private String nameEn;
+    @Column(name = "name_fr")
+    private String nameFr;
+    @Column(name = "name_zh")
+    private String nameZh;
+    @Column(name = "description_en")
+    private String descriptionEn;
+    @Column(name = "description_fr")
+    private String descriptionFr;
+    @Column(name = "description_zh")
+    private String descriptionZh;
+
     /** Precio en colones, sin I.V.A. */
     @Column(nullable = false)
     private int price;
@@ -35,6 +49,6 @@ public class Item {
     @Column(nullable = false)
     private int position;
 
-    /** public_id de la foto en Cloudinary; null si no tiene foto. */
+    /** Ruta relativa de la foto dentro del volumen de uploads; null si no tiene foto. */
     private String image;
 }

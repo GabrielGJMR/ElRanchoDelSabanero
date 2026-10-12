@@ -17,6 +17,7 @@ import java.util.List;
 public class GalleryService {
 
     private static final String FOLDER = "rancho/galeria";
+    private static final int MAX_PHOTOS = 30;
 
     private final GalleryPhotoRepository photos;
     private final ImageStorage images;
@@ -30,6 +31,9 @@ public class GalleryService {
 
     @Transactional
     public GalleryPhotoResponse add(MultipartFile file) {
+        if (photos.countByIdNotNull() >= MAX_PHOTOS) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "La galería alcanzó el máximo de 30 fotos");
+        }
         GalleryPhoto photo = new GalleryPhoto();
         photo.setPosition(photos.countByIdNotNull());
         photo.setImage(images.store(file, FOLDER));

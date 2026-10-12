@@ -3,13 +3,17 @@
 Sitio web del restaurante (Liberia, Costa Rica): menú público y panel de administración.
 
 - `backend/`: Spring Boot 4 + Java 21 + PostgreSQL (Flyway crea las tablas y carga el menú).
-- `frontend/`: React + TypeScript (Vite). Al hacer `npm run build`, Maven empaqueta `frontend/dist` dentro del backend, así que todo se sirve desde un solo puerto.
+- `frontend/`: React + TypeScript (Vite), compilado como archivos estáticos y servido por su propio contenedor Nginx.
+
+Todo es self-hosted: sin Cloudinary, S3, Supabase ni ningún otro servicio externo de pago. Las fotos
+(platillos y galería del local) se guardan en disco, en un volumen de Docker. Ver `deploy/DEPLOY.md` para
+el despliegue completo con Docker Compose en un VPS.
 
 ## Requisitos
 - Java 21
 - Node.js 20 o superior
 - PostgreSQL con una base de datos llamada `rancho`
-- Una cuenta de [Cloudinary](https://cloudinary.com) (gratis) para las fotos
+- Docker y Docker Compose (solo para correr todo junto como en producción, ver más abajo)
 
 ## Base de datos (una sola vez)
 Con PostgreSQL instalado, crea la base de datos:
@@ -22,38 +26,36 @@ Por defecto el backend usa `postgres` / `dev` en `localhost:5432`. Para cambiarl
 Dos terminales:
 ```bash
 cd backend
-ADMIN_PASSWORD=tu-clave \
-CLOUDINARY_CLOUD_NAME=tu-cloud-name CLOUDINARY_API_KEY=tu-api-key CLOUDINARY_API_SECRET=tu-api-secret \
-./mvnw spring-boot:run     # API en http://localhost:8080
+ADMIN_PASSWORD=tu-clave ./mvnw spring-boot:run     # API en http://localhost:8080
 ```
 ```bash
 cd frontend
 npm install        # solo la primera vez
 npm run dev        # web en http://localhost:5173 (envía /api al backend)
 ```
-(En PowerShell: `$env:ADMIN_PASSWORD="tu-clave"; $env:CLOUDINARY_CLOUD_NAME="..."; $env:CLOUDINARY_API_KEY="..."; $env:CLOUDINARY_API_SECRET="..."; ./mvnw spring-boot:run`)
+(En PowerShell: `$env:ADMIN_PASSWORD="tu-clave"; ./mvnw spring-boot:run`)
 
-Sin las variables de Cloudinary el backend arranca igual (útil si solo va a tocar el menú), pero subir o
-borrar fotos falla hasta que las defina. Los 3 valores están en el Dashboard de cloudinary.com, cuenta gratis.
+Las fotos se guardan en `backend/uploads/` (configurable con `UPLOADS_DIR`), fuera del repositorio.
 
 - Menú público: http://localhost:5173
 - Administración: http://localhost:5173/admin (usuario `admin`)
 
 Si no defines `ADMIN_PASSWORD`, se genera una clave temporal y se imprime en la consola al arrancar.
 
-## Correr todo junto (como en producción)
+## Correr todo junto con Docker Compose (como en producción)
 ```bash
-cd frontend && npm install && npm run build
-cd ../backend && ./mvnw spring-boot:run
+cp .env.example .env    # complete DOMAIN, DB_PASSWORD, ADMIN_PASSWORD
+docker compose up -d --build
 ```
-La web y la API quedan en http://localhost:8080 (administración en `/admin`).
+Levanta Postgres, el backend, el frontend y Caddy (reverse proxy con HTTPS automático vía Let's Encrypt).
+Detalles completos, variables de entorno y respaldos en `deploy/DEPLOY.md`.
 
 ## Páginas
 `/` Inicio · `/menu` Menú · `/ubicacion` Ubicación (mapa de Google) · `/contacto` Contacto · `/admin` Administración
 
 ## Fotos
-Todas las fotos (platillos y galería del local) se guardan en **Cloudinary**, no en el repositorio ni en el
-servidor. El navegador las reduce a 1200 px antes de subirlas.
+Todas las fotos (platillos y galería del local) se guardan en disco local, en el volumen `uploads` de
+Docker (no en Cloudinary ni ningún otro servicio externo). El navegador las reduce a 1200 px antes de subirlas.
 - **Fotos de los platillos:** botón `+` junto a cada platillo en `/admin`. Si un platillo no tiene foto, se
   muestra un recuadro con el escudo.
 - **Fotos del local (sección "Así es el rancho" en Inicio):** sección "Fotos del local" al final de `/admin`.

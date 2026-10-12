@@ -17,7 +17,7 @@ public class GalleryPhoto {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /** public_id de la foto en Cloudinary. */
+    /** Ruta relativa de la foto dentro del volumen de uploads. */
     @Column(nullable = false)
     private String image;
 

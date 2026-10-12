@@ -13,7 +13,7 @@ import java.util.Iterator;
 
 /**
  * Valida que una foto subida sea un JPG o PNG real (nunca confía en el nombre ni el content-type que manda
- * el navegador: lee los bytes de la imagen). La usan tanto el storage real (Cloudinary) como el de pruebas.
+ * el navegador: lee los bytes de la imagen). La usan tanto el storage real (disco local) como el de pruebas.
  */
 final class ImageValidation {
 

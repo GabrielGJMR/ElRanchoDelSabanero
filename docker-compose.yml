@@ -1,0 +1,105 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: rancho-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-rancho}
+      POSTGRES_USER: ${DB_USER:-rancho}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Falta DB_PASSWORD en .env}
+    # Solo en localhost: permite conectarse con psql/pgAdmin/DBeaver o con el backend corriendo
+    # fuera de Docker (mvn spring-boot:run). Atado a 127.0.0.1, así que en el VPS sigue sin
+    # quedar expuesto a internet. Se usa el puerto 5434 (no 5432) porque este Windows ya tiene
+    # un Postgres nativo propio escuchando en el 5432; adentro del contenedor y de la red
+    # interna de Docker el servicio sigue siendo "db:5432" normal.
+    ports:
+      - "127.0.0.1:5434:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-rancho} -d ${DB_NAME:-rancho}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+    container_name: rancho-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: jdbc:postgresql://db:5432/${DB_NAME:-rancho}
+      DB_USER: ${DB_USER:-rancho}
+      DB_PASSWORD: ${DB_PASSWORD:?Falta DB_PASSWORD en .env}
+      ADMIN_USER: ${ADMIN_USER:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Falta ADMIN_PASSWORD en .env}
+      TRANSLATE_URL: http://libretranslate:5000
+    volumes:
+      - uploads:/data/uploads
+
+  # Traduce el menú (inglés/francés/chino) para el backend. Self-hosted: sin cuenta, sin API key,
+  # sin costo. Solo es alcanzable dentro de la red interna de Docker (no se expone ningún puerto
+  # a internet). La primera vez que arranca descarga los modelos de idioma (~1-2 GB, tarda unos
+  # minutos); mientras tanto el backend simplemente muestra el menú en español.
+  libretranslate:
+    image: libretranslate/libretranslate:latest
+    container_name: rancho-libretranslate
+    restart: unless-stopped
+    environment:
+      LT_LOAD_ONLY: es,en,fr,zh
+      LT_DISABLE_WEB_UI: "true"
+      LT_UPDATE_MODELS: "true"
+    volumes:
+      - libretranslate_models:/home/libretranslate/.local/share/argos-translate
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: rancho-frontend
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: rancho-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - backend
+      - frontend
+    environment:
+      DOMAIN: ${DOMAIN:?Falta DOMAIN en .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+  backup:
+    image: postgres:16-alpine
+    container_name: rancho-backup
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGHOST: db
+      PGDATABASE: ${DB_NAME:-rancho}
+      PGUSER: ${DB_USER:-rancho}
+      PGPASSWORD: ${DB_PASSWORD:?Falta DB_PASSWORD en .env}
+      BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-14}
+    volumes:
+      - ./backups:/backups
+      - ./deploy/backup.sh:/backup.sh:ro
+    entrypoint: ["/bin/sh", "/backup.sh"]
+
+volumes:
+  db_data:
+  uploads:
+  caddy_data:
+  caddy_config:
+  libretranslate_models:
