@@ -34,7 +34,11 @@
       { "title": "Hamburguesas", "text": "Criolla, Juanita, Smash Burger Tajona y la Carreta sin Bueyes." },
       { "title": "Pollo", "text": "Gordon Blue, filete al ajillo, al grill o a la plancha, y fajitas clásicas o jalapeñas." },
       { "title": "Surtidos", "text": "El Peón, para 5 personas. El Gamonal, para 8." }
-    ]
+    ],
+    "carouselLabel": "Fotos de nuestros platillos",
+    "carouselGoTo": "Ver foto {{n}}",
+    "carouselPrev": "Foto anterior",
+    "carouselNext": "Foto siguiente"
   },
   "gallery": {
     "heading": "Así es el rancho",
@@ -78,7 +82,8 @@
     "pageTitle": "Ubicación",
     "title": "Ubicación",
     "mapTitle": "Mapa de {{name}}",
-    "openInMaps": "Abrir en Google Maps"
+    "openInMaps": "Abrir en Google Maps",
+    "openInWaze": "Abrir en Waze"
   },
   "contactPage": {
     "pageTitle": "Contacto",

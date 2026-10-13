@@ -2,6 +2,8 @@ package com.ranchosabanero.backend.controller;
 
 import com.ranchosabanero.backend.dto.CategoryRequest;
 import com.ranchosabanero.backend.dto.GalleryPhotoResponse;
+import com.ranchosabanero.backend.dto.GallerySectionRequest;
+import com.ranchosabanero.backend.dto.GallerySectionResponse;
 import com.ranchosabanero.backend.dto.ItemRequest;
 import com.ranchosabanero.backend.dto.MenuCategoryResponse;
 import com.ranchosabanero.backend.dto.MenuItemResponse;
@@ -107,17 +109,42 @@ public class AdminController {
         menuService.deleteItem(id);
     }
 
-    // ---- Galería del local ("Así es el rancho" en la portada) ----
+    // ---- Secciones de fotos del local (Inicio) ----
+    // Crear/renombrar/borrar secciones es solo para Admin (ver SecurityConfig); subir/borrar fotos
+    // dentro de una sección existente es para Admin y Editor.
 
-    @PostMapping(value = "/gallery", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @ResponseStatus(HttpStatus.CREATED)
-    public GalleryPhotoResponse addGalleryPhoto(@RequestParam("file") MultipartFile file) {
-        return galleryService.add(file);
+    @GetMapping("/gallery/sections")
+    public List<GallerySectionResponse> gallerySections() {
+        return galleryService.adminSections();
     }
 
-    @DeleteMapping("/gallery/{id}")
+    @PostMapping("/gallery/sections")
+    @ResponseStatus(HttpStatus.CREATED)
+    public GallerySectionResponse createGallerySection(@Valid @RequestBody GallerySectionRequest request) {
+        return galleryService.createSection(request);
+    }
+
+    @PutMapping("/gallery/sections/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void renameGallerySection(@PathVariable Long id, @Valid @RequestBody GallerySectionRequest request) {
+        galleryService.renameSection(id, request);
+    }
+
+    @DeleteMapping("/gallery/sections/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteGallerySection(@PathVariable Long id) {
+        galleryService.deleteSection(id);
+    }
+
+    @PostMapping(value = "/gallery/sections/{sectionId}/photos", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
+    public GalleryPhotoResponse addGalleryPhoto(@PathVariable Long sectionId, @RequestParam("file") MultipartFile file) {
+        return galleryService.addPhoto(sectionId, file);
+    }
+
+    @DeleteMapping("/gallery/photos/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteGalleryPhoto(@PathVariable Long id) {
-        galleryService.delete(id);
+        galleryService.deletePhoto(id);
     }
 }

@@ -34,7 +34,11 @@
       { "title": "汉堡", "text": "Criolla、Juanita、Smash Burger Tajona 和 Carreta sin Bueyes。" },
       { "title": "鸡肉", "text": "Gordon Blue、蒜香/烤制/煎制鸡排,以及经典或哈拉皮诺法希达。" },
       { "title": "拼盘", "text": "El Peón,5人份。El Gamonal,8人份。" }
-    ]
+    ],
+    "carouselLabel": "我们菜品的照片",
+    "carouselGoTo": "查看第 {{n}} 张照片",
+    "carouselPrev": "上一张照片",
+    "carouselNext": "下一张照片"
   },
   "gallery": {
     "heading": "这就是我们的餐厅",
@@ -78,7 +82,8 @@
     "pageTitle": "位置",
     "title": "位置",
     "mapTitle": "{{name}} 的地图",
-    "openInMaps": "在 Google 地图中打开"
+    "openInMaps": "在 Google 地图中打开",
+    "openInWaze": "在 Waze 中打开"
   },
   "contactPage": {
     "pageTitle": "联系方式",

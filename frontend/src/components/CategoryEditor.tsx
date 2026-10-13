@@ -1,5 +1,7 @@
 import { useId, useState } from 'react'
 import type { Category, ItemInput, MenuItem } from '../api.ts'
+import AddButton from './AddButton.tsx'
+import DeleteButton from './DeleteButton.tsx'
 import ItemRow from './ItemRow.tsx'
 
 interface Props {
@@ -8,9 +10,11 @@ interface Props {
   items?: MenuItem[]
   open: boolean
   onToggle: () => void
-  /** El menú al que pertenece la categoría lo agrega quien llama; aquí solo se edita nombre/nota. */
-  onSaveCategory: (id: number, data: { name: string; note: string }) => Promise<boolean>
-  onDeleteCategory: (category: Category) => Promise<void>
+  /** El menú al que pertenece la categoría lo agrega quien llama; aquí solo se edita nombre/nota.
+   *  Si se omiten (rol Editor), la categoría se muestra de solo lectura: ni nombre/nota ni borrar,
+   *  pero sus platillos siguen totalmente editables. */
+  onSaveCategory?: (id: number, data: { name: string; note: string }) => Promise<boolean>
+  onDeleteCategory?: (category: Category) => Promise<void>
   onSaveItem: (id: number, data: ItemInput) => Promise<boolean>
   onDeleteItem: (item: MenuItem) => Promise<void>
   onAddItem: (data: ItemInput) => Promise<boolean>
@@ -32,8 +36,10 @@ export default function CategoryEditor({
   const [newDescription, setNewDescription] = useState('')
   const [newPrice, setNewPrice] = useState('')
 
+  const canManage = Boolean(onSaveCategory && onDeleteCategory)
+
   async function saveCategory() {
-    if (await onSaveCategory(category.id, { name, note })) {
+    if (await onSaveCategory?.(category.id, { name, note })) {
       setSaved(true)
       setTimeout(() => setSaved(false), 1200)
     }
@@ -85,23 +91,27 @@ export default function CategoryEditor({
       >
         <div className="overflow-hidden">
           <div className="border-t border-line-soft px-4 pt-4 pb-1">
-            <div className="grid grid-cols-2 items-center gap-2 sm:grid-cols-[1fr_1fr_auto_auto]">
-              <input
-                className="field font-bold text-gold"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                aria-label="Nombre de la categoría"
-              />
-              <input
-                className="field"
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                placeholder="Nota (opcional)"
-                aria-label="Nota"
-              />
-              <button className="btn btn-sm" onClick={saveCategory}>{saved ? '✓ Guardado' : 'Guardar'}</button>
-              <button className="btn btn-sm btn-ghost" onClick={() => onDeleteCategory(category)}>Borrar</button>
-            </div>
+            {canManage ? (
+              <div className="grid grid-cols-2 items-center gap-2 sm:grid-cols-[1fr_1fr_auto_auto]">
+                <input
+                  className="field font-bold text-gold"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  aria-label="Nombre de la categoría"
+                />
+                <input
+                  className="field"
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  placeholder="Nota (opcional)"
+                  aria-label="Nota"
+                />
+                <button className="btn btn-sm" onClick={saveCategory}>{saved ? '✓ Guardado' : 'Guardar'}</button>
+                <DeleteButton onClick={() => onDeleteCategory?.(category)} description={`Borrar categoría ${category.name}`} />
+              </div>
+            ) : note ? (
+              <p className="mb-2 text-sm text-muted">{note}</p>
+            ) : null}
 
             {shownItems.map((item) => (
               <ItemRow
@@ -114,15 +124,7 @@ export default function CategoryEditor({
               />
             ))}
 
-            {!addingItem && (
-              <button
-                type="button"
-                onClick={() => setAddingItem(true)}
-                className="my-3 cursor-pointer text-sm font-semibold text-gold hover:text-fire"
-              >
-                + Agregar platillo
-              </button>
-            )}
+            {!addingItem && <AddButton onClick={() => setAddingItem(true)} label="Agregar platillo" className="my-3" />}
 
             {addingItem && (
               <div className="my-3 flex flex-col gap-2 rounded-lg border border-dashed border-line p-2.5 lg:grid lg:grid-cols-[1.2fr_1.4fr_110px_auto_auto] lg:items-center">

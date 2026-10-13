@@ -81,7 +81,7 @@ class MenuApiTests {
         var admin = httpBasic("admin", "clave-de-prueba");
 
         String eventsId = mvc.perform(get("/api/admin/menus").with(admin)).andReturn().getResponse().getContentAsString()
-                .replaceAll("(?s).*\\{\"id\":(\\d+),\"name\":\"Eventos\"\\}.*", "$1");
+                .replaceAll("(?s).*\\{\"id\":(\\d+),\"name\":\"Eventos\".*?\\}.*", "$1");
 
         mvc.perform(post("/api/admin/categories").with(admin).contentType(MediaType.APPLICATION_JSON)
                         .content("{\"menuId\":" + eventsId + ",\"name\":\"Paquetes de cumpleaños\"}"))
@@ -138,28 +138,44 @@ class MenuApiTests {
     }
 
     @Test
-    void adminCanManageGalleryPhotos() throws Exception {
+    void adminCanManageGallerySectionsAndPhotos() throws Exception {
         var admin = httpBasic("admin", "clave-de-prueba");
         var png = new java.io.ByteArrayOutputStream();
         javax.imageio.ImageIO.write(new java.awt.image.BufferedImage(10, 10, java.awt.image.BufferedImage.TYPE_INT_RGB), "png", png);
 
-        mvc.perform(get("/api/gallery")).andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(0));
+        // Sección propia para esta prueba: no depende de la sección sembrada ("Así es el rancho").
+        String sectionId = mvc.perform(post("/api/admin/gallery/sections").with(admin).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Sección de prueba\"}"))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString()
+                .replaceAll(".*\"id\":(\\d+).*", "$1");
 
-        mvc.perform(multipart("/api/admin/gallery")
+        mvc.perform(post("/api/admin/gallery/sections").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Otra\"}"))
+                .andExpect(status().isUnauthorized());
+
+        mvc.perform(get("/api/gallery"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[?(@.name=='Sección de prueba')].photos.length()").value(0));
+
+        mvc.perform(multipart("/api/admin/gallery/sections/" + sectionId + "/photos")
                         .file(new MockMultipartFile("file", "local.png", "image/png", png.toByteArray())))
                 .andExpect(status().isUnauthorized());
 
-        String body = mvc.perform(multipart("/api/admin/gallery")
+        String body = mvc.perform(multipart("/api/admin/gallery/sections/" + sectionId + "/photos")
                         .file(new MockMultipartFile("file", "local.png", "image/png", png.toByteArray()))
                         .with(admin))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.url").value(org.hamcrest.Matchers.startsWith("/uploads/")))
                 .andReturn().getResponse().getContentAsString();
-        String id = body.replaceAll(".*\"id\":(\\d+).*", "$1");
+        String photoId = body.replaceAll(".*\"id\":(\\d+).*", "$1");
 
-        mvc.perform(get("/api/gallery")).andExpect(jsonPath("$.length()").value(1));
+        mvc.perform(get("/api/gallery"))
+                .andExpect(jsonPath("$[?(@.name=='Sección de prueba')].photos.length()").value(1));
 
-        mvc.perform(delete("/api/admin/gallery/" + id).with(admin)).andExpect(status().isNoContent());
-        mvc.perform(get("/api/gallery")).andExpect(jsonPath("$.length()").value(0));
+        mvc.perform(delete("/api/admin/gallery/photos/" + photoId).with(admin)).andExpect(status().isNoContent());
+        mvc.perform(delete("/api/admin/gallery/sections/" + sectionId).with(admin)).andExpect(status().isNoContent());
+        mvc.perform(get("/api/gallery"))
+                .andExpect(jsonPath("$[?(@.name=='Sección de prueba')]").doesNotExist());
     }
 }

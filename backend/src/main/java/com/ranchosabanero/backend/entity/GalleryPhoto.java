@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/** Fotos del local que se muestran en la portada ("Así es el rancho"), administrables desde el panel. */
+/** Una foto del local, dentro de una sección (ver GallerySection), administrable desde el panel. */
 @Entity
 @Table(name = "gallery_photos")
 @Getter
@@ -16,6 +16,10 @@ public class GalleryPhoto {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "section_id")
+    private GallerySection section;
 
     /** Ruta relativa de la foto dentro del volumen de uploads. */
     @Column(nullable = false)

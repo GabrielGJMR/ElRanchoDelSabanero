@@ -1,12 +1,15 @@
 import { useState } from 'react'
 import type { MenuType } from '../api.ts'
+import AddButton from './AddButton.tsx'
+import DeleteButton from './DeleteButton.tsx'
 
 interface Props {
   menus: MenuType[]
   onSelect: (menu: MenuType) => void
-  onCreate: (name: string) => Promise<boolean>
-  onRename: (menu: MenuType, name: string) => Promise<boolean>
-  onDelete: (menu: MenuType) => Promise<void>
+  /** Si se omiten (rol Editor), no se muestra crear/renombrar/borrar: Editor solo elige y edita contenido. */
+  onCreate?: (name: string) => Promise<boolean>
+  onRename?: (menu: MenuType, name: string) => Promise<boolean>
+  onDelete?: (menu: MenuType) => Promise<void>
 }
 
 /** Pantalla tras iniciar sesión: elegir cuál de los tipos de menú administrar. */
@@ -22,11 +25,11 @@ export default function MenuPicker({ menus, onSelect, onCreate, onRename, onDele
   }
 
   async function saveRename(menu: MenuType) {
-    if (await onRename(menu, editingName)) setEditingId(null)
+    if (await onRename?.(menu, editingName)) setEditingId(null)
   }
 
   async function createMenu() {
-    if (await onCreate(newName)) {
+    if (await onCreate?.(newName)) {
       setNewName('')
       setAdding(false)
     }
@@ -34,7 +37,7 @@ export default function MenuPicker({ menus, onSelect, onCreate, onRename, onDele
 
   async function deleteMenu(menu: MenuType) {
     if (!window.confirm(`¿Borrar el menú "${menu.name}" y todas sus categorías y platillos?`)) return
-    await onDelete(menu)
+    await onDelete?.(menu)
   }
 
   return (
@@ -68,31 +71,25 @@ export default function MenuPicker({ menus, onSelect, onCreate, onRename, onDele
                 >
                   {menu.name}
                 </button>
-                <div className="flex gap-3 text-xs">
-                  <button type="button" className="cursor-pointer font-semibold text-muted hover:text-gold" onClick={() => startRename(menu)}>
-                    Renombrar
-                  </button>
-                  <button type="button" className="cursor-pointer font-semibold text-muted hover:text-fire" onClick={() => deleteMenu(menu)}>
-                    Borrar
-                  </button>
-                </div>
+                {(onRename || onDelete) && (
+                  <div className="flex items-center justify-between gap-3 text-xs">
+                    {onRename && (
+                      <button type="button" className="cursor-pointer font-semibold text-muted hover:text-gold" onClick={() => startRename(menu)}>
+                        Renombrar
+                      </button>
+                    )}
+                    {onDelete && <DeleteButton onClick={() => deleteMenu(menu)} description={`Borrar menú ${menu.name}`} size="sm" />}
+                  </div>
+                )}
               </>
             )}
           </div>
         ))}
       </div>
 
-      {!adding && (
-        <button
-          type="button"
-          onClick={() => setAdding(true)}
-          className="mt-5 cursor-pointer text-sm font-semibold text-gold hover:text-fire"
-        >
-          + Nuevo menú
-        </button>
-      )}
+      {onCreate && !adding && <AddButton onClick={() => setAdding(true)} label="Nuevo menú" className="mt-5" />}
 
-      {adding && (
+      {onCreate && adding && (
         <div className="mt-5 flex items-center gap-2 rounded-lg border border-dashed border-line p-2.5 sm:w-96">
           <input
             className="field"

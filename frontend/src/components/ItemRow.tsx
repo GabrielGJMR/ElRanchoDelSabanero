@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import type { MenuItem } from '../api.ts'
+import DeleteButton from './DeleteButton.tsx'
 
 interface Props {
   item: MenuItem
@@ -110,7 +111,7 @@ export default function ItemRow({ item, onSave, onDelete, onUploadImage, onRemov
 
       <div className="flex items-center gap-2 lg:contents">
         <button className="btn btn-sm flex-1 lg:flex-initial" onClick={save}>{saved ? '✓' : 'Guardar'}</button>
-        <button className="btn btn-sm btn-ghost flex-1 lg:flex-initial" onClick={() => onDelete(item)}>Borrar</button>
+        <DeleteButton onClick={() => onDelete(item)} description={`Borrar ${item.name}`} />
       </div>
     </div>
   )

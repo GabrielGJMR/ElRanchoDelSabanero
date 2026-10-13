@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { SITE } from '../config.ts'
+import SocialLinks from './SocialLinks.tsx'
 
 const YEAR = new Date().getFullYear()
 
@@ -23,6 +24,7 @@ export default function Footer() {
           <li><Link to="/ubicacion" className="text-muted no-underline hover:text-ember">{t('footer.location')}</Link></li>
           <li><Link to="/contacto" className="text-muted no-underline hover:text-ember">{t('footer.contact')}</Link></li>
         </ul>
+        <SocialLinks />
       </div>
       <p className="border-t border-line-soft py-4 text-center text-xs text-muted">© {YEAR} {SITE.name}</p>
     </footer>

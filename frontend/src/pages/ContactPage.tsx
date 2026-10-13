@@ -31,7 +31,7 @@ export default function ContactPage() {
                   stroke="currentColor" strokeWidth={1.6} strokeLinejoin="round"
                 />
               </svg>
-              <span className="border-b-2 border-dotted border-brasa/40 pb-1 font-body text-5xl font-bold tracking-wide tabular-nums transition-colors group-hover:border-brasa sm:text-6xl">
+              <span className="border-b-2 border-dotted border-brasa/40 pb-1 font-script text-6xl font-normal transition-colors group-hover:border-brasa sm:text-7xl">
                 {SITE.phone}
               </span>
             </a>

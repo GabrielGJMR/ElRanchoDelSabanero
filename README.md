@@ -40,7 +40,11 @@ Las fotos se guardan en `backend/uploads/` (configurable con `UPLOADS_DIR`), fue
 - Menú público: http://localhost:5173
 - Administración: http://localhost:5173/admin (usuario `admin`)
 
-Si no defines `ADMIN_PASSWORD`, se genera una clave temporal y se imprime en la consola al arrancar.
+`ADMIN_USER`/`ADMIN_PASSWORD` solo se usan para crear el primer usuario administrador, la primera vez
+que arranca el backend (tabla `app_users` vacía). Después de eso ya no se vuelven a leer: los usuarios
+se gestionan desde la pestaña "Usuarios" del panel (ver más abajo), y un restart no pisa la clave que
+se haya cambiado desde ahí. Si no defines `ADMIN_PASSWORD` esa primera vez, se genera una clave
+temporal y se imprime en la consola al arrancar.
 
 ## Correr todo junto con Docker Compose (como en producción)
 ```bash
@@ -61,16 +65,29 @@ Docker (no en Cloudinary ni ningún otro servicio externo). El navegador las red
 - **Fotos del local (sección "Así es el rancho" en Inicio):** sección "Fotos del local" al final de `/admin`.
   Suba o borre las que quiera, sin tocar código ni recompilar.
 
+## Usuarios y roles
+Pestaña "Usuarios" en `/admin` (solo visible para Admin). Dos roles:
+- **Administrador**: acceso total, incluida la gestión de usuarios y la estructura de menús/categorías
+  (crear, renombrar, borrar).
+- **Editor**: solo el contenido del día a día — platillos, precios, disponibilidad y fotos (de platillos
+  y de la galería). No puede borrar categorías/menús ni crear usuarios.
+
+Los usuarios viven en la tabla `app_users` (con clave en hash, nunca en texto plano). Debe quedar
+siempre al menos un Administrador: el backend no deja borrar el último ni el propio usuario logueado.
+
 ## API
 | Ruta | Acceso |
 |---|---|
 | `GET /api/menu` | público |
 | `GET /api/gallery` | público |
-| `GET /api/admin/menu` | admin (incluye platillos ocultos) |
-| `POST/PUT/DELETE /api/admin/categories[/{id}]` | admin |
-| `POST/PUT/DELETE /api/admin/items[/{id}]` | admin |
-| `POST/DELETE /api/admin/items/{id}/image` | admin (sube o quita la foto) |
-| `POST/DELETE /api/admin/gallery[/{id}]` | admin (foto del local) |
+| `GET /api/admin/me` | admin o editor (quién soy, para saber mi rol) |
+| `GET /api/admin/menu` | admin o editor (incluye platillos ocultos) |
+| `POST/PUT/DELETE /api/admin/menus[/{id}]` | admin |
+| `POST/DELETE /api/admin/categories[/{id}]`, `PUT /api/admin/categories/{id}` | admin |
+| `POST/PUT/DELETE /api/admin/items[/{id}]` | admin o editor |
+| `POST/DELETE /api/admin/items/{id}/image` | admin o editor (sube o quita la foto) |
+| `POST/DELETE /api/admin/gallery[/{id}]` | admin o editor (foto del local) |
+| `GET/POST/PUT/DELETE /api/admin/users[/{id}]` | admin |
 
 ## Pruebas
 ```bash
@@ -79,4 +96,5 @@ cd backend && ./mvnw test
 Usan H2 en memoria, no necesitan PostgreSQL.
 
 ## Pendiente
-- Registro e inicio de sesión opcional para clientes (tabla `users`, rol `CUSTOMER`, rutas `/api/auth/**`).
+- Registro e inicio de sesión opcional para clientes (tabla propia, distinta de `app_users`; rol
+  `CUSTOMER`, rutas `/api/auth/**`).

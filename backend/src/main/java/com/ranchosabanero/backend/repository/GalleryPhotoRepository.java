@@ -9,5 +9,7 @@ public interface GalleryPhotoRepository extends JpaRepository<GalleryPhoto, Long
 
     List<GalleryPhoto> findAllByOrderByPositionAscIdAsc();
 
-    int countByIdNotNull();
+    List<GalleryPhoto> findBySectionIdOrderByPositionAscIdAsc(Long sectionId);
+
+    int countBySectionId(Long sectionId);
 }

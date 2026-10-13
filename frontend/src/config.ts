@@ -14,4 +14,6 @@ export const SITE = {
   mapsEmbed: 'https://www.google.com/maps?q=El+Rancho+del+Sabanero+Liberia+Costa+Rica&output=embed',
   // Enlace para abrir la ubicación en la app de Google Maps (botón "Cómo llegar").
   mapsLink: 'https://www.google.com/maps/search/?api=1&query=El+Rancho+del+Sabanero+Liberia+Costa+Rica',
+  // Enlace para abrir la ubicación en la app de Waze (botón "Abrir en Waze").
+  wazeLink: 'https://www.waze.com/ul?q=El+Rancho+del+Sabanero+Liberia+Costa+Rica&navigate=yes',
 }

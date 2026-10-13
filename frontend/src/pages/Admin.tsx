@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
-  adminRequest, basicAuth, fetchGallery, UnauthorizedError,
-  type Category, type CategoryInput, type GalleryPhoto, type ItemInput, type MenuItem, type MenuType,
+  adminRequest, basicAuth, ForbiddenError, UnauthorizedError,
+  type AppUser, type Category, type GalleryPhoto, type GallerySection, type ItemInput, type MenuItem, type MenuType, type Role,
 } from '../api.ts'
 import Brand from '../components/Brand.tsx'
-import CategoryEditor from '../components/CategoryEditor.tsx'
 import GalleryEditor from '../components/GalleryEditor.tsx'
+import MenuCategoriesPanel from '../components/MenuCategoriesPanel.tsx'
 import MenuPicker from '../components/MenuPicker.tsx'
-import { normalize } from '../format.ts'
+import UsersPanel from '../components/UsersPanel.tsx'
 import { resizeImage } from '../image.ts'
 import LoginForm from '../components/LoginForm.tsx'
 import Toast from '../components/Toast.tsx'
@@ -17,7 +17,7 @@ const STORAGE_KEY = 'adminAuth'
 // Qué tipo de menú se eligió en el panel (también por pestaña, para que sobreviva un refresh).
 const SELECTED_MENU_KEY = 'adminSelectedMenu'
 
-type Tab = 'menu' | 'gallery'
+type Tab = 'menu' | 'eventos' | 'gallery' | 'users'
 
 export default function Admin() {
   const [auth, setAuth] = useState(() => sessionStorage.getItem(STORAGE_KEY) ?? '')
@@ -27,15 +27,21 @@ export default function Admin() {
     return saved ? Number(saved) : null
   })
   const [categories, setCategories] = useState<Category[] | null>(null)
-  const [gallery, setGallery] = useState<GalleryPhoto[] | null>(null)
+  const [eventosCategories, setEventosCategories] = useState<Category[] | null>(null)
+  const [gallerySections, setGallerySections] = useState<GallerySection[] | null>(null)
+  const [me, setMe] = useState<AppUser | null>(null)
+  const [users, setUsers] = useState<AppUser[] | null>(null)
   const [error, setError] = useState('')
   const [tab, setTab] = useState<Tab>('menu')
-  const [addingCategory, setAddingCategory] = useState(false)
-  const [newCategory, setNewCategory] = useState({ name: '', note: '' })
-  const [query, setQuery] = useState('')
-  const [openCategories, setOpenCategories] = useState<Set<number> | null>(null)
 
-  const selectedMenu = menus?.find((m) => m.id === selectedMenuId) ?? null
+  // "Eventos" es un menú más en la base de datos, pero con página pública propia (ver Menu.slug);
+  // no se muestra junto a los menús de comida ni se puede borrar por accidente desde aquí.
+  const foodMenus = menus?.filter((m) => !m.slug) ?? null
+  const eventosMenu = menus?.find((m) => m.slug === 'eventos') ?? null
+  const eventosMenuId = eventosMenu?.id ?? null
+  const selectedMenu = foodMenus?.find((m) => m.id === selectedMenuId) ?? null
+  // Editor: solo contenido del día a día (platillos/fotos). Admin: también estructura y usuarios.
+  const isAdmin = me?.role === 'ADMIN'
 
   const logout = useCallback(() => {
     sessionStorage.removeItem(STORAGE_KEY)
@@ -44,39 +50,43 @@ export default function Admin() {
     setMenus(null)
     setSelectedMenuId(null)
     setCategories(null)
-    setGallery(null)
-    setOpenCategories(null)
+    setEventosCategories(null)
+    setGallerySections(null)
+    setMe(null)
+    setUsers(null)
   }, [])
 
   function selectMenu(menu: MenuType) {
     sessionStorage.setItem(SELECTED_MENU_KEY, String(menu.id))
     setSelectedMenuId(menu.id)
     setCategories(null)
-    setOpenCategories(null)
-    setQuery('')
-    setAddingCategory(false)
   }
 
   function backToMenus() {
     sessionStorage.removeItem(SELECTED_MENU_KEY)
     setSelectedMenuId(null)
     setCategories(null)
-    setOpenCategories(null)
-    setQuery('')
-    setAddingCategory(false)
   }
 
-  const loadCategories = useCallback(async (menuId: number) => {
+  const loadMenuCategories = useCallback(async (menuId: number) => {
     try {
-      const data = await adminRequest<Category[]>(auth, `menus/${menuId}/categories`)
-      setCategories(data)
-      setOpenCategories((prev) => prev ?? new Set(data[0] ? [data[0].id] : []))
+      setCategories(await adminRequest<Category[]>(auth, `menus/${menuId}/categories`))
     } catch (e) {
       if (e instanceof UnauthorizedError) logout()
-      else {
+      else if (!(e instanceof ForbiddenError)) {
         setError((e as Error).message)
         backToMenus()
       }
+    }
+  }, [auth, logout])
+
+  const loadEventosCategories = useCallback(async (menuId: number) => {
+    try {
+      setEventosCategories(await adminRequest<Category[]>(auth, `menus/${menuId}/categories`))
+    } catch (e) {
+      if (e instanceof UnauthorizedError) logout()
+      else if (e instanceof ForbiddenError) setError(e.message)
+      else setError((e as Error).message)
     }
   }, [auth, logout])
 
@@ -84,37 +94,56 @@ export default function Admin() {
     setMenus(await adminRequest<MenuType[]>(auth, 'menus'))
   }, [auth])
 
-  const reloadGallery = useCallback(async () => {
-    setGallery(await fetchGallery())
-  }, [])
+  const reloadGallerySections = useCallback(async () => {
+    setGallerySections(await adminRequest<GallerySection[]>(auth, 'gallery/sections'))
+  }, [auth])
 
-  // Al iniciar sesión: carga los tipos de menú y la galería.
+  const reloadUsers = useCallback(async () => {
+    setUsers(await adminRequest<AppUser[]>(auth, 'users'))
+  }, [auth])
+
+  // Al iniciar sesión: carga los tipos de menú, la galería y quién soy (para saber mi rol).
   useEffect(() => {
     if (!auth) return
     let cancelled = false
     void (async () => {
       try {
-        const [menusData, galleryData] = await Promise.all([
+        const [menusData, galleryData, meData] = await Promise.all([
           adminRequest<MenuType[]>(auth, 'menus'),
-          fetchGallery(),
+          adminRequest<GallerySection[]>(auth, 'gallery/sections'),
+          adminRequest<AppUser>(auth, 'me'),
         ])
         if (cancelled) return
         setMenus(menusData)
-        setGallery(galleryData)
+        setGallerySections(galleryData)
+        setMe(meData)
       } catch (e) {
         if (cancelled) return
         if (e instanceof UnauthorizedError) logout()
+        else if (e instanceof ForbiddenError) setError(e.message)
         else setError((e as Error).message)
       }
     })()
     return () => { cancelled = true }
   }, [auth, logout])
 
-  // Al elegir un menú (o restaurar la elección guardada): carga sus categorías.
+  // La lista de usuarios es solo para Admin (la pestaña "Usuarios" ni se muestra a un Editor).
+  useEffect(() => {
+    if (!auth || !isAdmin) return
+    void reloadUsers()
+  }, [auth, isAdmin, reloadUsers])
+
+  // Al elegir un menú de comida (o restaurar la elección guardada): carga sus categorías.
   useEffect(() => {
     if (!auth || selectedMenuId == null) return
-    void loadCategories(selectedMenuId)
-  }, [auth, selectedMenuId, loadCategories])
+    void loadMenuCategories(selectedMenuId)
+  }, [auth, selectedMenuId, loadMenuCategories])
+
+  // "Eventos" no pasa por el selector: se carga solo (como la galería) en cuanto se conoce su id.
+  useEffect(() => {
+    if (!auth || eventosMenuId == null) return
+    void loadEventosCategories(eventosMenuId)
+  }, [auth, eventosMenuId, loadEventosCategories])
 
   /** Ejecuta una acción de escritura: muestra el error si falla y recarga si sale bien. Devuelve si tuvo éxito. */
   async function run(action: () => Promise<unknown>, reload?: () => Promise<void>): Promise<boolean> {
@@ -125,6 +154,7 @@ export default function Admin() {
       return true
     } catch (e) {
       if (e instanceof UnauthorizedError) logout()
+      else if (e instanceof ForbiddenError) setError(e.message)
       else setError((e as Error).message)
       return false
     }
@@ -142,8 +172,6 @@ export default function Admin() {
     return true
   }
 
-  const reloadCurrentCategories = () => (selectedMenuId == null ? Promise.resolve() : loadCategories(selectedMenuId))
-
   const createMenuType = (name: string) => run(() => adminRequest(auth, 'menus', 'POST', { name }), reloadMenus)
   const renameMenuType = (menu: MenuType, name: string) => run(() => adminRequest(auth, `menus/${menu.id}`, 'PUT', { name }), reloadMenus)
   const deleteMenuType = async (menu: MenuType) => {
@@ -151,74 +179,86 @@ export default function Admin() {
     if (selectedMenuId === menu.id) backToMenus()
   }
 
-  const saveCategory = (id: number, data: CategoryInput) =>
-    run(() => adminRequest(auth, `categories/${id}`, 'PUT', data))
-
-  const deleteCategory = async (c: Category) => {
-    if (!window.confirm(`¿Borrar la categoría "${c.name}" y todos sus platillos?`)) return
-    await run(() => adminRequest(auth, `categories/${c.id}`, 'DELETE'), reloadCurrentCategories)
-  }
+  const saveCategory = (id: number, menuId: number, data: { name: string; note: string }) =>
+    run(() => adminRequest(auth, `categories/${id}`, 'PUT', { ...data, menuId }))
 
   const saveItem = (id: number, data: ItemInput) => run(() => adminRequest(auth, `items/${id}`, 'PUT', data))
 
-  const deleteItem = async (item: MenuItem) => {
-    if (!window.confirm(`¿Borrar "${item.name}"?`)) return
-    await run(() => adminRequest(auth, `items/${item.id}`, 'DELETE'), reloadCurrentCategories)
-  }
-
-  const addItem = (data: ItemInput) => run(() => adminRequest(auth, 'items', 'POST', data), reloadCurrentCategories)
-
-  const uploadImage = (id: number, file: File) =>
-    run(async () => {
-      const form = new FormData()
-      form.append('file', await resizeImage(file), 'foto.jpg')
-      await adminRequest(auth, `items/${id}/image`, 'POST', form)
-    }, reloadCurrentCategories)
-
-  const removeImage = (id: number) => run(() => adminRequest(auth, `items/${id}/image`, 'DELETE'), reloadCurrentCategories)
-
-  const uploadGalleryPhoto = (file: File) =>
-    run(async () => {
-      const form = new FormData()
-      form.append('file', await resizeImage(file), 'foto.jpg')
-      await adminRequest(auth, 'gallery', 'POST', form)
-    }, reloadGallery)
-
-  const deleteGalleryPhoto = async (photo: GalleryPhoto) => {
-    await run(() => adminRequest(auth, `gallery/${photo.id}`, 'DELETE'), reloadGallery)
-  }
-
-  async function addCategory() {
-    if (!selectedMenu) return
-    const ok = await run(
-      () => adminRequest(auth, 'categories', 'POST', { ...newCategory, menuId: selectedMenu.id }),
-      reloadCurrentCategories,
-    )
-    if (ok) {
-      setNewCategory({ name: '', note: '' })
-      setAddingCategory(false)
+  /**
+   * Agrupa las acciones de categorías/platillos de un menú, recargando sus categorías (no las de
+   * otro menú) al escribir. Los platillos siempre se pueden editar; renombrar/borrar categorías
+   * (o crear nuevas) solo si canManageCategories (rol Admin) — ver MenuCategoriesPanel/CategoryEditor.
+   */
+  function categoryActions(menuId: number, reload: () => Promise<void>, canManageCategories: boolean) {
+    return {
+      onSaveCategory: canManageCategories
+        ? (id: number, data: { name: string; note: string }) => saveCategory(id, menuId, data)
+        : undefined,
+      onDeleteCategory: canManageCategories
+        ? async (c: Category) => {
+            if (!window.confirm(`¿Borrar la categoría "${c.name}" y todos sus platillos?`)) return
+            await run(() => adminRequest(auth, `categories/${c.id}`, 'DELETE'), reload)
+          }
+        : undefined,
+      onSaveItem: saveItem,
+      onDeleteItem: async (item: MenuItem) => {
+        if (!window.confirm(`¿Borrar "${item.name}"?`)) return
+        await run(() => adminRequest(auth, `items/${item.id}`, 'DELETE'), reload)
+      },
+      onAddItem: (data: ItemInput) => run(() => adminRequest(auth, 'items', 'POST', data), reload),
+      onUploadImage: (id: number, file: File) =>
+        run(async () => {
+          const form = new FormData()
+          form.append('file', await resizeImage(file), 'foto.jpg')
+          await adminRequest(auth, `items/${id}/image`, 'POST', form)
+        }, reload),
+      onRemoveImage: (id: number) => run(() => adminRequest(auth, `items/${id}/image`, 'DELETE'), reload),
+      onAddCategory: canManageCategories
+        ? (data: { name: string; note: string }) => run(() => adminRequest(auth, 'categories', 'POST', { ...data, menuId }), reload)
+        : undefined,
     }
   }
 
+  const createGallerySection = (data: { name: string; note: string }) =>
+    run(() => adminRequest(auth, 'gallery/sections', 'POST', data), reloadGallerySections)
+
+  const renameGallerySection = (section: GallerySection, data: { name: string; note: string }) =>
+    run(() => adminRequest(auth, `gallery/sections/${section.id}`, 'PUT', data), reloadGallerySections)
+
+  const deleteGallerySection = async (section: GallerySection) => {
+    await run(() => adminRequest(auth, `gallery/sections/${section.id}`, 'DELETE'), reloadGallerySections)
+  }
+
+  const uploadGalleryPhoto = (sectionId: number, file: File) =>
+    run(async () => {
+      const form = new FormData()
+      form.append('file', await resizeImage(file), 'foto.jpg')
+      await adminRequest(auth, `gallery/sections/${sectionId}/photos`, 'POST', form)
+    }, reloadGallerySections)
+
+  const deleteGalleryPhoto = async (photo: GalleryPhoto) => {
+    await run(() => adminRequest(auth, `gallery/photos/${photo.id}`, 'DELETE'), reloadGallerySections)
+  }
+
+  const createUser = (data: { username: string; password: string; role: Role }) =>
+    run(() => adminRequest(auth, 'users', 'POST', data), reloadUsers)
+
+  const updateUser = (user: AppUser, data: { password: string; role: Role }) =>
+    run(() => adminRequest(auth, `users/${user.id}`, 'PUT', data), reloadUsers)
+
+  const deleteUser = async (user: AppUser) => {
+    await run(() => adminRequest(auth, `users/${user.id}`, 'DELETE'), reloadUsers)
+  }
+
   const itemCount = categories?.reduce((n, c) => n + c.items.length, 0) ?? 0
+  const eventosItemCount = eventosCategories?.reduce((n, c) => n + c.items.length, 0) ?? 0
 
-  const toggleCategory = (id: number) =>
-    setOpenCategories((prev) => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
-    })
-
-  const q = normalize(query)
-  const visibleCategories = (categories ?? []).flatMap((c) => {
-    if (!q) return [{ category: c, items: c.items }]
-    const categoryMatches = normalize(c.name).includes(q)
-    const items = categoryMatches ? c.items : c.items.filter(
-      (it) => normalize(it.name).includes(q) || normalize(it.description ?? '').includes(q),
-    )
-    return categoryMatches || items.length > 0 ? [{ category: c, items }] : []
-  })
+  const tabs: [Tab, string][] = [
+    ['menu', 'Menú'],
+    ['eventos', 'Eventos'],
+    ['gallery', 'Fotos del local'],
+  ]
+  if (isAdmin) tabs.push(['users', 'Usuarios'])
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-6">
@@ -234,17 +274,16 @@ export default function Admin() {
           <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm text-muted">
               {tab === 'menu' && selectedMenu && (categories ? `${categories.length} categorías · ${itemCount} platillos` : 'Cargando...')}
-              {tab === 'menu' && !selectedMenu && (menus ? `${menus.length} ${menus.length === 1 ? 'menú' : 'menús'}` : 'Cargando...')}
-              {tab === 'gallery' && (gallery ? `${gallery.length} fotos del local` : 'Cargando...')}
+              {tab === 'menu' && !selectedMenu && (foodMenus ? `${foodMenus.length} ${foodMenus.length === 1 ? 'menú' : 'menús'}` : 'Cargando...')}
+              {tab === 'eventos' && (eventosCategories ? `${eventosCategories.length} categorías · ${eventosItemCount} paquetes` : 'Cargando...')}
+              {tab === 'gallery' && (gallerySections ? `${gallerySections.length} ${gallerySections.length === 1 ? 'sección' : 'secciones'} de fotos` : 'Cargando...')}
+              {tab === 'users' && (users ? `${users.length} ${users.length === 1 ? 'usuario' : 'usuarios'}` : 'Cargando...')}
             </p>
             <button className="btn btn-sm btn-ghost" onClick={logout}>Cerrar sesión</button>
           </div>
 
           <div role="tablist" aria-label="Secciones del panel" className="mb-5 flex gap-1 border-b border-line-soft">
-            {([
-              ['menu', 'Menú'],
-              ['gallery', 'Fotos del local'],
-            ] as const).map(([value, label]) => (
+            {tabs.map(([value, label]) => (
               <button
                 key={value}
                 role="tab"
@@ -261,112 +300,62 @@ export default function Admin() {
 
           {tab === 'menu' && (
             <div role="tabpanel">
-              {!menus && <p className="text-sm text-muted">Cargando...</p>}
+              {!foodMenus && <p className="text-sm text-muted">Cargando...</p>}
 
-              {menus && !selectedMenu && (
+              {foodMenus && !selectedMenu && (
                 <MenuPicker
-                  menus={menus}
+                  menus={foodMenus}
                   onSelect={selectMenu}
-                  onCreate={createMenuType}
-                  onRename={renameMenuType}
-                  onDelete={deleteMenuType}
+                  onCreate={isAdmin ? createMenuType : undefined}
+                  onRename={isAdmin ? renameMenuType : undefined}
+                  onDelete={isAdmin ? deleteMenuType : undefined}
                 />
               )}
 
-              {menus && selectedMenu && (
-                <div>
-                  <button
-                    type="button"
-                    onClick={backToMenus}
-                    className="mb-4 cursor-pointer text-sm font-semibold text-muted hover:text-gold"
-                  >
-                    ← Cambiar menú
-                  </button>
-                  <h2 className="mb-4 font-bold text-gold">{selectedMenu.name}</h2>
+              {foodMenus && selectedMenu && (
+                <MenuCategoriesPanel
+                  key={selectedMenu.id}
+                  menu={selectedMenu}
+                  categories={categories}
+                  onBack={backToMenus}
+                  {...categoryActions(selectedMenu.id, () => loadMenuCategories(selectedMenu.id), isAdmin)}
+                />
+              )}
+            </div>
+          )}
 
-                  {!categories && <p className="text-sm text-muted">Cargando...</p>}
+          {tab === 'eventos' && (
+            <div role="tabpanel">
+              {!eventosMenu && <p className="text-sm text-muted">Cargando...</p>}
 
-                  {categories && categories.length > 0 && (
-                    <div className="relative mb-4">
-                      <svg
-                        viewBox="0 0 20 20" fill="none" aria-hidden="true"
-                        className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted"
-                      >
-                        <circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth={2} />
-                        <path d="M14 14l4 4" stroke="currentColor" strokeWidth={2} strokeLinecap="round" />
-                      </svg>
-                      <input
-                        type="search"
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        placeholder="Buscar categoría o platillo..."
-                        aria-label="Buscar en el menú"
-                        className="field pl-9"
-                      />
-                    </div>
-                  )}
-
-                  {categories && q && visibleCategories.length === 0 && (
-                    <p className="text-sm text-muted italic">No encontramos nada con "{query}".</p>
-                  )}
-
-                  {visibleCategories.map(({ category: c, items }) => (
-                    <CategoryEditor
-                      key={c.id}
-                      category={c}
-                      items={items}
-                      open={q ? true : (openCategories?.has(c.id) ?? false)}
-                      onToggle={() => toggleCategory(c.id)}
-                      onSaveCategory={(id, data) => saveCategory(id, { ...data, menuId: selectedMenu.id })}
-                      onDeleteCategory={deleteCategory}
-                      onSaveItem={saveItem}
-                      onDeleteItem={deleteItem}
-                      onAddItem={addItem}
-                      onUploadImage={uploadImage}
-                      onRemoveImage={removeImage}
-                    />
-                  ))}
-
-                  {categories && !addingCategory && (
-                    <button
-                      type="button"
-                      onClick={() => setAddingCategory(true)}
-                      className="mt-5 cursor-pointer text-sm font-semibold text-gold hover:text-fire"
-                    >
-                      + Nueva categoría
-                    </button>
-                  )}
-
-                  {categories && addingCategory && (
-                    <div className="mt-5 grid grid-cols-2 items-center gap-2 rounded-lg border border-dashed border-line p-2.5 sm:grid-cols-[1fr_1fr_auto_auto]">
-                      <input
-                        className="field"
-                        autoFocus
-                        value={newCategory.name}
-                        onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
-                        placeholder="Nombre (ej. Postres)"
-                      />
-                      <input
-                        className="field"
-                        value={newCategory.note}
-                        onChange={(e) => setNewCategory({ ...newCategory, note: e.target.value })}
-                        placeholder="Nota (opcional)"
-                      />
-                      <button className="btn btn-sm" onClick={addCategory}>Agregar</button>
-                      <button className="btn btn-sm btn-ghost" onClick={() => setAddingCategory(false)}>Cancelar</button>
-                    </div>
-                  )}
-                </div>
+              {eventosMenu && (
+                <MenuCategoriesPanel
+                  key={eventosMenu.id}
+                  menu={eventosMenu}
+                  categories={eventosCategories}
+                  onRename={isAdmin ? (name) => renameMenuType(eventosMenu, name) : undefined}
+                  {...categoryActions(eventosMenu.id, () => loadEventosCategories(eventosMenu.id), isAdmin)}
+                />
               )}
             </div>
           )}
 
           {tab === 'gallery' && (
             <div role="tabpanel">
-              {!gallery && <p className="text-sm text-muted">Cargando...</p>}
-              {gallery && (
-                <GalleryEditor photos={gallery} onUpload={uploadGalleryPhoto} onDelete={deleteGalleryPhoto} />
-              )}
+              <GalleryEditor
+                sections={gallerySections}
+                onRenameSection={isAdmin ? renameGallerySection : undefined}
+                onDeleteSection={isAdmin ? deleteGallerySection : undefined}
+                onAddSection={isAdmin ? createGallerySection : undefined}
+                onUploadPhoto={uploadGalleryPhoto}
+                onDeletePhoto={deleteGalleryPhoto}
+              />
+            </div>
+          )}
+
+          {tab === 'users' && isAdmin && me && (
+            <div role="tabpanel">
+              <UsersPanel users={users} currentUsername={me.username} onCreate={createUser} onUpdate={updateUser} onDelete={deleteUser} />
             </div>
           )}
         </>

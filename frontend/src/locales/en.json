@@ -34,7 +34,11 @@
       { "title": "Burgers", "text": "Criolla, Juanita, Smash Burger Tajona and the Carreta sin Bueyes." },
       { "title": "Chicken", "text": "Gordon Blue, fillet with garlic sauce, grilled or pan-seared, and classic or jalapeño fajitas." },
       { "title": "Sharing platters", "text": "El Peón, for 5 people. El Gamonal, for 8." }
-    ]
+    ],
+    "carouselLabel": "Photos of our dishes",
+    "carouselGoTo": "View photo {{n}}",
+    "carouselPrev": "Previous photo",
+    "carouselNext": "Next photo"
   },
   "gallery": {
     "heading": "This is our rancho",
@@ -78,7 +82,8 @@
     "pageTitle": "Location",
     "title": "Location",
     "mapTitle": "Map of {{name}}",
-    "openInMaps": "Open in Google Maps"
+    "openInMaps": "Open in Google Maps",
+    "openInWaze": "Open in Waze"
   },
   "contactPage": {
     "pageTitle": "Contact",
