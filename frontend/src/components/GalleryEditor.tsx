@@ -1,7 +1,8 @@
 import { useRef, useState } from 'react'
-import type { GalleryPhoto, GallerySection } from '../api.ts'
+import type { GalleryPhoto, GallerySection } from '../lib/api.ts'
 import AddButton from './AddButton.tsx'
 import DeleteButton from './DeleteButton.tsx'
+import Loader from './Loader.tsx'
 
 interface PhotoGridProps {
   section: GallerySection
@@ -46,7 +47,7 @@ function SectionPhotoGrid({ section, onUpload, onDelete }: PhotoGridProps) {
         className="flex aspect-square cursor-pointer items-center justify-center rounded-lg border border-dashed border-line text-2xl text-muted transition-colors hover:border-fire hover:text-fire disabled:opacity-50"
         aria-label={`Agregar foto a ${section.name}`}
       >
-        {uploading ? '…' : '+'}
+        {uploading ? <Loader label="Subiendo..." size="sm" /> : '+'}
       </button>
       <input ref={fileInput} type="file" accept="image/*" hidden onChange={(e) => pickFile(e.target.files?.[0])} />
     </div>
@@ -98,7 +99,13 @@ export default function GalleryEditor({ sections, onRenameSection, onDeleteSecti
     }
   }
 
-  if (!sections) return <p className="text-sm text-muted">Cargando...</p>
+  if (!sections) {
+    return (
+      <div className="flex justify-center py-6">
+        <Loader label="Cargando..." size="sm" showLabel />
+      </div>
+    )
+  }
 
   return (
     <section className="space-y-8">

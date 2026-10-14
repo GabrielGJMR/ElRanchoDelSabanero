@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { fetchMenuBySlug, type Category } from '../api.ts'
+import { fetchMenuBySlug, type Category } from '../lib/api.ts'
+import Loader from '../components/Loader.tsx'
 import PageHeader from '../components/PageHeader.tsx'
 import PhotoFrame from '../components/PhotoFrame.tsx'
-import { colones, normalize } from '../format.ts'
-import { usePageTitle } from '../usePageTitle.ts'
+import { colones, normalize } from '../lib/format.ts'
+import { usePageTitle } from '../hooks/usePageTitle.ts'
 
 /** Paquetes de eventos (cumpleaños, inflables, etc.): mismo catálogo que la carta, pero su propio menú ("eventos"). */
 export default function EventsPage() {
@@ -87,7 +88,11 @@ export default function EventsPage() {
 
         <div className="mx-auto max-w-3xl px-4 pt-6 pb-16">
           {failed && <p className="py-10 text-center text-paper-muted">{t('eventsPage.loadFailed')}</p>}
-          {!menu && !failed && <p className="py-10 text-center text-paper-muted">{t('eventsPage.loading')}</p>}
+          {!menu && !failed && (
+            <div className="flex justify-center py-10">
+              <Loader label={t('eventsPage.loading')} showLabel labelClassName="text-paper-muted" />
+            </div>
+          )}
           {empty && <p className="py-10 text-center text-paper-muted">{t('eventsPage.empty')}</p>}
           {menu && !failed && q && categories.length === 0 && (
             <p className="py-10 text-center text-paper-muted">{t('eventsPage.noResults', { query })}</p>

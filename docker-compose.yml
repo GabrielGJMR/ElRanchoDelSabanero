@@ -49,6 +49,11 @@ services:
     image: libretranslate/libretranslate:latest
     container_name: rancho-libretranslate
     restart: unless-stopped
+    # La imagen corre como el usuario "libretranslate" (uid 1032), pero un volumen nombrado recién
+    # creado por Docker en Windows queda de root: sin esto, el contenedor no puede escribir los
+    # modelos descargados ("Permission denied"). Como el servicio no expone ningún puerto a internet
+    # (solo red interna de Docker), correr como root acá es un riesgo bajo.
+    user: "0:0"
     environment:
       LT_LOAD_ONLY: es,en,fr,zh
       LT_DISABLE_WEB_UI: "true"

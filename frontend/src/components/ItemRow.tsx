@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
-import type { MenuItem } from '../api.ts'
+import type { MenuItem } from '../lib/api.ts'
 import DeleteButton from './DeleteButton.tsx'
+import Loader from './Loader.tsx'
 
 interface Props {
   item: MenuItem
@@ -44,11 +45,17 @@ export default function ItemRow({ item, onSave, onDelete, onUploadImage, onRemov
             type="button"
             onClick={() => fileInput.current?.click()}
             disabled={uploading}
-            className="size-14 cursor-pointer overflow-hidden rounded-lg border border-line bg-[#120e0b] text-2xl text-muted transition-colors hover:border-fire disabled:opacity-50"
+            className="flex size-14 cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-line bg-[#120e0b] text-2xl text-muted transition-colors hover:border-fire disabled:opacity-50"
             title={item.imageUrl ? 'Cambiar foto' : 'Agregar foto'}
             aria-label={item.imageUrl ? `Cambiar foto de ${item.name}` : `Agregar foto a ${item.name}`}
           >
-            {uploading ? '…' : item.imageUrl ? <img src={item.imageUrl} alt="" className="size-full object-cover" /> : '+'}
+            {uploading ? (
+              <Loader label="Subiendo..." size="sm" />
+            ) : item.imageUrl ? (
+              <img src={item.imageUrl} alt="" className="size-full object-cover" />
+            ) : (
+              '+'
+            )}
           </button>
           {item.imageUrl && !uploading && (
             <button

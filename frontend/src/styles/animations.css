@@ -1,0 +1,23 @@
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+/* Zoom lento y continuo sobre la foto del inicio, como una toma de cine ("Ken Burns"). */
+@keyframes ken-burns {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

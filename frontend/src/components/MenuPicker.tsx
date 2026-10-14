@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { MenuType } from '../api.ts'
+import type { MenuType } from '../lib/api.ts'
 import AddButton from './AddButton.tsx'
 import DeleteButton from './DeleteButton.tsx'
 

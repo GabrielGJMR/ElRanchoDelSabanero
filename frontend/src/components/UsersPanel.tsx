@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import type { AppUser, Role } from '../api.ts'
+import type { AppUser, Role } from '../lib/api.ts'
 import AddButton from './AddButton.tsx'
 import DeleteButton from './DeleteButton.tsx'
+import Loader from './Loader.tsx'
 
 interface Props {
   users: AppUser[] | null
@@ -49,7 +50,11 @@ export default function UsersPanel({ users, currentUsername, onCreate, onUpdate,
         Administrador: acceso total. Editor: platillos, precios, disponibilidad y fotos; no borra categorías/menús ni gestiona usuarios.
       </p>
 
-      {!users && <p className="text-sm text-muted">Cargando...</p>}
+      {!users && (
+        <div className="flex justify-center py-6">
+          <Loader label="Cargando..." size="sm" showLabel />
+        </div>
+      )}
 
       {users && (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">

@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import PageHeader from '../components/PageHeader.tsx'
-import { SITE } from '../config.ts'
-import { usePageTitle } from '../usePageTitle.ts'
+import { SITE } from '../lib/config.ts'
+import { usePageTitle } from '../hooks/usePageTitle.ts'
 
 const link =
   'flex items-center justify-between gap-4 border-b border-paper-line py-4 text-paper-ink no-underline hover:text-brasa'

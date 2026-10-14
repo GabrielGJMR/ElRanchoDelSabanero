@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import type { Category, ItemInput, MenuItem, MenuType } from '../api.ts'
-import { normalize } from '../format.ts'
+import type { Category, ItemInput, MenuItem, MenuType } from '../lib/api.ts'
+import { normalize } from '../lib/format.ts'
 import AddButton from './AddButton.tsx'
 import CategoryEditor from './CategoryEditor.tsx'
+import Loader from './Loader.tsx'
 
 interface Props {
   menu: MenuType
@@ -102,7 +103,11 @@ export default function MenuCategoriesPanel({
         </div>
       )}
 
-      {!categories && <p className="text-sm text-muted">Cargando...</p>}
+      {!categories && (
+        <div className="flex justify-center py-6">
+          <Loader label="Cargando..." size="sm" showLabel />
+        </div>
+      )}
 
       {categories && categories.length > 0 && (
         <div className="relative mb-4">

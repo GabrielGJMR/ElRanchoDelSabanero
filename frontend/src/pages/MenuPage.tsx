@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { fetchMenu, type Category } from '../api.ts'
+import { fetchMenu, type Category } from '../lib/api.ts'
+import Loader from '../components/Loader.tsx'
 import PageHeader from '../components/PageHeader.tsx'
 import PhotoFrame from '../components/PhotoFrame.tsx'
-import { colones, normalize } from '../format.ts'
-import { usePageTitle } from '../usePageTitle.ts'
+import { colones, normalize } from '../lib/format.ts'
+import { usePageTitle } from '../hooks/usePageTitle.ts'
 
 export default function MenuPage() {
   const { t, i18n } = useTranslation()
@@ -82,7 +83,11 @@ export default function MenuPage() {
 
         <div className="mx-auto max-w-3xl px-4 pt-6 pb-16">
           {failed && <p className="py-10 text-center text-paper-muted">{t('menuPage.loadFailed')}</p>}
-          {!menu && !failed && <p className="py-10 text-center text-paper-muted">{t('menuPage.loading')}</p>}
+          {!menu && !failed && (
+            <div className="flex justify-center py-10">
+              <Loader label={t('menuPage.loading')} showLabel labelClassName="text-paper-muted" />
+            </div>
+          )}
           {menu && !failed && q && categories.length === 0 && (
             <p className="py-10 text-center text-paper-muted">{t('menuPage.noResults', { query })}</p>
           )}

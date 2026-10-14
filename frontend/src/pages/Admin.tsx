@@ -2,13 +2,14 @@ import { useCallback, useEffect, useState } from 'react'
 import {
   adminRequest, basicAuth, ForbiddenError, UnauthorizedError,
   type AppUser, type Category, type GalleryPhoto, type GallerySection, type ItemInput, type MenuItem, type MenuType, type Role,
-} from '../api.ts'
+} from '../lib/api.ts'
 import Brand from '../components/Brand.tsx'
 import GalleryEditor from '../components/GalleryEditor.tsx'
+import Loader from '../components/Loader.tsx'
 import MenuCategoriesPanel from '../components/MenuCategoriesPanel.tsx'
 import MenuPicker from '../components/MenuPicker.tsx'
 import UsersPanel from '../components/UsersPanel.tsx'
-import { resizeImage } from '../image.ts'
+import { resizeImage } from '../lib/image.ts'
 import LoginForm from '../components/LoginForm.tsx'
 import Toast from '../components/Toast.tsx'
 
@@ -18,6 +19,14 @@ const STORAGE_KEY = 'adminAuth'
 const SELECTED_MENU_KEY = 'adminSelectedMenu'
 
 type Tab = 'menu' | 'eventos' | 'gallery' | 'users'
+
+// Reutilizado por el resumen de cada pestaña y por las pantallas que esperan su primera carga.
+const LOADING_INLINE = (
+  <span className="inline-flex items-center gap-2">
+    <Loader label="Cargando..." size="sm" />
+    Cargando...
+  </span>
+)
 
 export default function Admin() {
   const [auth, setAuth] = useState(() => sessionStorage.getItem(STORAGE_KEY) ?? '')
@@ -262,9 +271,18 @@ export default function Admin() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-6">
-      <div className="mb-5 flex items-center justify-between border-b border-line-soft pb-4">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-line-soft pb-5">
         <Brand />
-        <span className="text-xs tracking-[.14em] text-muted uppercase">Administración</span>
+        {auth && me ? (
+          <span className="inline-flex items-center gap-2 rounded-full border border-gold/25 bg-card px-3.5 py-1.5 text-xs text-muted">
+            <span className="size-1.5 shrink-0 rounded-full bg-ember" aria-hidden="true" />
+            <span className="text-ink">{me.username}</span>
+            <span className="text-muted/50">·</span>
+            {isAdmin ? 'Administrador' : 'Editor'}
+          </span>
+        ) : (
+          <span className="text-xs tracking-[.14em] text-muted uppercase">Administración</span>
+        )}
       </div>
 
       {!auth && <LoginForm onLogin={login} />}
@@ -272,26 +290,26 @@ export default function Admin() {
       {auth && (
         <>
           <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm text-muted">
-              {tab === 'menu' && selectedMenu && (categories ? `${categories.length} categorías · ${itemCount} platillos` : 'Cargando...')}
-              {tab === 'menu' && !selectedMenu && (foodMenus ? `${foodMenus.length} ${foodMenus.length === 1 ? 'menú' : 'menús'}` : 'Cargando...')}
-              {tab === 'eventos' && (eventosCategories ? `${eventosCategories.length} categorías · ${eventosItemCount} paquetes` : 'Cargando...')}
-              {tab === 'gallery' && (gallerySections ? `${gallerySections.length} ${gallerySections.length === 1 ? 'sección' : 'secciones'} de fotos` : 'Cargando...')}
-              {tab === 'users' && (users ? `${users.length} ${users.length === 1 ? 'usuario' : 'usuarios'}` : 'Cargando...')}
-            </p>
+            <span className="inline-flex items-center rounded-full bg-[#120e0b] px-3.5 py-1.5 text-xs text-muted shadow-[inset_2px_4px_8px_rgba(5,5,5,0.45)]">
+              {tab === 'menu' && selectedMenu && (categories ? `${categories.length} categorías · ${itemCount} platillos` : LOADING_INLINE)}
+              {tab === 'menu' && !selectedMenu && (foodMenus ? `${foodMenus.length} ${foodMenus.length === 1 ? 'menú' : 'menús'}` : LOADING_INLINE)}
+              {tab === 'eventos' && (eventosCategories ? `${eventosCategories.length} categorías · ${eventosItemCount} paquetes` : LOADING_INLINE)}
+              {tab === 'gallery' && (gallerySections ? `${gallerySections.length} ${gallerySections.length === 1 ? 'sección' : 'secciones'} de fotos` : LOADING_INLINE)}
+              {tab === 'users' && (users ? `${users.length} ${users.length === 1 ? 'usuario' : 'usuarios'}` : LOADING_INLINE)}
+            </span>
             <button className="btn btn-sm btn-ghost" onClick={logout}>Cerrar sesión</button>
           </div>
 
-          <div role="tablist" aria-label="Secciones del panel" className="mb-5 flex gap-1 border-b border-line-soft">
+          {/* Mismas pestañas "selladas" con muesca que el resto del sitio usa para sus botones,
+              en vez del típico subrayado plano de cualquier panel genérico. */}
+          <div role="tablist" aria-label="Secciones del panel" className="mb-6 flex flex-wrap gap-2.5">
             {tabs.map(([value, label]) => (
               <button
                 key={value}
                 role="tab"
                 aria-selected={tab === value}
                 onClick={() => setTab(value)}
-                className={`cursor-pointer border-b-2 px-3.5 py-2 text-sm font-semibold transition-colors ${
-                  tab === value ? 'border-fire text-gold' : 'border-transparent text-muted hover:text-ink'
-                }`}
+                className={tab === value ? 'btn btn-sm' : 'btn btn-sm btn-ghost'}
               >
                 {label}
               </button>
@@ -300,7 +318,7 @@ export default function Admin() {
 
           {tab === 'menu' && (
             <div role="tabpanel">
-              {!foodMenus && <p className="text-sm text-muted">Cargando...</p>}
+              {!foodMenus && <p className="py-6 text-sm text-muted">{LOADING_INLINE}</p>}
 
               {foodMenus && !selectedMenu && (
                 <MenuPicker
@@ -326,7 +344,7 @@ export default function Admin() {
 
           {tab === 'eventos' && (
             <div role="tabpanel">
-              {!eventosMenu && <p className="text-sm text-muted">Cargando...</p>}
+              {!eventosMenu && <p className="py-6 text-sm text-muted">{LOADING_INLINE}</p>}
 
               {eventosMenu && (
                 <MenuCategoriesPanel

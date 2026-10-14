@@ -1,5 +1,5 @@
 import { useId, useState } from 'react'
-import type { Category, ItemInput, MenuItem } from '../api.ts'
+import type { Category, ItemInput, MenuItem } from '../lib/api.ts'
 import AddButton from './AddButton.tsx'
 import DeleteButton from './DeleteButton.tsx'
 import ItemRow from './ItemRow.tsx'

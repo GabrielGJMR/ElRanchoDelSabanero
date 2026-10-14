@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { fetchGallery, type GallerySection } from '../api.ts'
+import { fetchGallery, type GallerySection } from '../lib/api.ts'
 import PhotoFrame from './PhotoFrame.tsx'
 import Reveal from './Reveal.tsx'
 
@@ -17,7 +17,7 @@ function HoverFrame({ className = '', ...props }: PhotoFrameProps) {
   )
 }
 
-/** Sección clásica: título y una grilla pareja de fotos, todas del mismo tamaño. */
+/** Sección "mosaico": la primera foto manda (grande), el resto la acompaña — nunca una grilla pareja y plana. */
 function GridSectionBlock({ section }: { section: GallerySection }) {
   const { t } = useTranslation()
   const items: (GallerySection['photos'][number] | null)[] =
@@ -28,14 +28,19 @@ function GridSectionBlock({ section }: { section: GallerySection }) {
       <Reveal>
         <h2 id={`galeria-${section.id}`} className="mb-8 font-display text-3xl text-gold md:text-4xl">{section.name}</h2>
 
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        {/* grid-flow-dense rellena los huecos que deja la foto grande: con cualquier cantidad de
+            fotos, el mosaico siempre queda parejo (el truco: aspect-square + col-span-2/row-span-2
+            hace que la foto grande mida exactamente lo mismo que dos chicas apiladas, sin huecos). */}
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:grid-flow-dense md:gap-4">
           {items.map((photo, i) => (
             <HoverFrame
               key={photo?.id ?? i}
               src={photo?.url}
               alt={photo ? t('gallery.photoAlt', { n: i + 1 }) : t('gallery.placeholderAlt')}
               placeholder={t('gallery.placeholderText')}
-              className="aspect-square w-full rounded-sm"
+              className={`aspect-square w-full rounded-lg border border-gold/15 ${
+                i === 0 && items.length > 1 ? 'md:col-span-2 md:row-span-2' : ''
+              }`}
             />
           ))}
         </div>

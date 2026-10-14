@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
-import { SITE } from '../config.ts'
+import { SITE } from '../lib/config.ts'
 import SocialLinks from './SocialLinks.tsx'
 
 const YEAR = new Date().getFullYear()

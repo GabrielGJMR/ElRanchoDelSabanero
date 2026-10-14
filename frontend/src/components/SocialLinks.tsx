@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { SITE } from '../config.ts'
+import { SITE } from '../lib/config.ts'
 
 interface Social {
   name: string

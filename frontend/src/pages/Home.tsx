@@ -5,7 +5,7 @@ import Hero from '../components/Hero.tsx'
 import LocationButton from '../components/LocationButton.tsx'
 import Reveal from '../components/Reveal.tsx'
 import Specialties from '../components/Specialties.tsx'
-import { usePageTitle } from '../usePageTitle.ts'
+import { usePageTitle } from '../hooks/usePageTitle.ts'
 
 export default function Home() {
   const { t } = useTranslation()

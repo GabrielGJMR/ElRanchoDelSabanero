@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { LANGUAGES } from '../i18n.ts'
+import { LANGUAGES } from '../lib/i18n.ts'
 
 const LABEL = 'Idioma / Language / Langue / 语言'
 
