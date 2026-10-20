@@ -22,7 +22,7 @@ export default function Toast({ message, onDismiss }: Props) {
     <div
       role="alert"
       aria-live="assertive"
-      className={`fixed inset-x-4 bottom-4 z-50 mx-auto max-w-md rounded-lg border border-fire bg-[#3a1410] px-4 py-3 text-sm text-ink shadow-lg transition-all duration-300 ${leaving ? 'translate-y-2 opacity-0' : 'translate-y-0 opacity-100'}`}
+      className={`toast fixed inset-x-4 bottom-4 z-50 mx-auto max-w-md rounded-lg border border-fire px-4 py-3 text-sm text-ink shadow-lg transition-all duration-300 ${leaving ? 'translate-y-2 opacity-0' : 'translate-y-0 opacity-100'}`}
     >
       <div className="flex items-start gap-3">
         <span className="flex-1">{message}</span>

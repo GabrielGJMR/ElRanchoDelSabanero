@@ -3,6 +3,23 @@
    pastilla los pone MapAppButton.tsx; aquí solo vive la animación del mapa, que es igual para
    las dos. --map-land-filter lo fija cada instancia (un id de filtro SVG único por botón). */
 
+.map-app-btn {
+  box-shadow:
+    0 -1px 2px rgba(3, 7, 18, .01),
+    0 -5px 6px rgba(3, 7, 18, .015),
+    0 -12px 12px rgba(3, 7, 18, .02),
+    0 -20px 22px rgba(3, 7, 18, .03),
+    0 -32px 32px rgba(3, 7, 18, .08);
+}
+.map-app-btn:active {
+  scale: 1.02;
+}
+
+/* Logo de la app (Google Maps / Waze) montado sobre la pastilla. */
+.map-app-icon {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .35));
+}
+
 .map-app-btn__container {
   position: absolute;
   left: 0;

@@ -71,13 +71,14 @@ async function parse<T>(res: Response): Promise<T> {
   return data as T
 }
 
-export async function fetchMenu(lang = 'es'): Promise<Category[]> {
-  return parse(await fetch('/api/menu?lang=' + encodeURIComponent(lang)))
-}
-
-/** Menú con página propia (por ahora solo "eventos"). */
+/** Menú con página propia (por ahora "eventos" y los 3 menús de comida: principal/casados/desayunos). */
 export async function fetchMenuBySlug(slug: string, lang = 'es'): Promise<Category[]> {
   return parse(await fetch(`/api/menu/${slug}?lang=${encodeURIComponent(lang)}`))
+}
+
+/** Los 3 menús de comida (sin "Eventos"), para las pestañas de /menu. No requiere login. */
+export async function fetchMenuTypes(): Promise<MenuType[]> {
+  return parse(await fetch('/api/menus'))
 }
 
 export async function fetchGallery(lang = 'es'): Promise<GallerySection[]> {

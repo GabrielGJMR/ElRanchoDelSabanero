@@ -30,7 +30,7 @@ export default function DeleteButton({ onClick, description, label = 'Borrar', s
       type="button"
       onClick={onClick}
       aria-label={description ?? label}
-      className={`group relative flex shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-[#120e0b] shadow-[0_0_20px_rgba(0,0,0,0.25)] transition-[width] duration-300 ease-out hover:bg-fire ${s.button} ${className}`}
+      className={`delete-btn group relative flex shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full transition-[width] duration-300 ease-out hover:bg-fire ${s.button} ${className}`}
     >
       <svg
         viewBox="0 0 448 512"

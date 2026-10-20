@@ -42,13 +42,10 @@ class MenuApiTests {
     void adminCanCreateEditHideAndDeleteItems() throws Exception {
         var admin = httpBasic("admin", "clave-de-prueba");
 
-        // Menú propio para esta prueba: no depende del orden de /api/admin/menus (que ya trae
-        // los menús sembrados, incluido "Eventos", que no sale en la carta pública).
-        String menuId = mvc.perform(post("/api/admin/menus").with(admin).contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"Menú de prueba\"}"))
-                .andExpect(status().isCreated())
-                .andReturn().getResponse().getContentAsString()
-                .replaceAll(".*\"id\":(\\d+).*", "$1");
+        // "Menú Principal" (el que sale en /api/menu): así la última aserción puede comprobar
+        // que un platillo oculto desaparece de la carta pública, igual que con los seeds.
+        String menuId = mvc.perform(get("/api/admin/menus").with(admin)).andReturn().getResponse().getContentAsString()
+                .replaceAll("(?s).*\\{\"id\":(\\d+),\"name\":\"Menú Principal\".*?\\}.*", "$1");
 
         mvc.perform(post("/api/admin/categories").with(admin).contentType(MediaType.APPLICATION_JSON)
                         .content("{\"menuId\":" + menuId + ",\"name\":\"Postres\"}"))
@@ -74,6 +71,20 @@ class MenuApiTests {
 
         mvc.perform(delete("/api/admin/items/" + itemId).with(admin)).andExpect(status().isNoContent());
         mvc.perform(delete("/api/admin/items/" + itemId).with(admin)).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void publicMenuTypesListsTheThreeFoodMenusButNotEvents() throws Exception {
+        mvc.perform(get("/api/menus"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[?(@.slug=='principal')]").exists())
+                .andExpect(jsonPath("$[?(@.slug=='casados')]").exists())
+                .andExpect(jsonPath("$[?(@.slug=='desayunos')]").exists())
+                .andExpect(jsonPath("$[?(@.slug=='eventos')]").doesNotExist());
+
+        // Casados y Desayunos ya tienen su propia página pública, solo que sin categorías todavía.
+        mvc.perform(get("/api/menu/casados")).andExpect(status().isOk()).andExpect(jsonPath("$").isArray());
+        mvc.perform(get("/api/menu/desayunos")).andExpect(status().isOk()).andExpect(jsonPath("$").isArray());
     }
 
     @Test

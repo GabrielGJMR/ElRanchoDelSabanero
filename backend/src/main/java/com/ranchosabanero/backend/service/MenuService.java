@@ -38,19 +38,18 @@ public class MenuService {
     private final TranslationService translator;
 
     /**
+     * Menú público por defecto (el primero que no sea "eventos", hoy "Menú Principal"), para
+     * quien llegue a /api/menu sin pedir un slug en particular.
      * @param onlyAvailable true para el menú público, false para el panel de administración
      * @param lang          "es" (por defecto), "en", "fr" o "zh"
      */
     @Transactional(readOnly = true)
     public List<MenuCategoryResponse> menu(boolean onlyAvailable, String lang) {
-        Map<Long, List<MenuItemResponse>> byCategory = items.findAllByOrderByPositionAscIdAsc().stream()
-                .filter(i -> !onlyAvailable || i.isAvailable())
-                .collect(Collectors.groupingBy(i -> i.getCategory().getId(), LinkedHashMap::new,
-                        Collectors.mapping(i -> MenuItemResponse.from(i, images, lang), Collectors.toList())));
-
-        return categories.findAllByMenuSlugIsNullOrderByMenuIdAscPositionAscIdAsc().stream()
-                .map(c -> MenuCategoryResponse.from(c, lang, byCategory.getOrDefault(c.getId(), List.of())))
-                .toList();
+        Menu principal = menus.findAllByOrderByPositionAscIdAsc().stream()
+                .filter(m -> !"eventos".equals(m.getSlug()))
+                .findFirst()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Menú no encontrado"));
+        return categoriesForMenu(principal.getId(), onlyAvailable, lang);
     }
 
     /** Menú público de un solo tipo con página propia (p.ej. "eventos"). 404 si no existe ese slug. */
@@ -59,6 +58,15 @@ public class MenuService {
         Menu menu = menus.findBySlug(slug)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Menú no encontrado"));
         return categoriesForMenu(menu.getId(), true, lang);
+    }
+
+    /** Los 3 menús de comida (excluye "Eventos", que tiene su propia página) para armar las pestañas públicas. */
+    @Transactional(readOnly = true)
+    public List<MenuResponse> publicMenuTypes() {
+        return menus.findAllByOrderByPositionAscIdAsc().stream()
+                .filter(m -> m.getSlug() != null && !m.getSlug().equals("eventos"))
+                .map(MenuResponse::from)
+                .toList();
     }
 
     // ---- Tipos de menú ----

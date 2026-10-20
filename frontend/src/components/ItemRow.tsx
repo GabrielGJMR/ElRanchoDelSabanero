@@ -1,7 +1,7 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import type { MenuItem } from '../lib/api.ts'
 import DeleteButton from './DeleteButton.tsx'
-import Loader from './Loader.tsx'
+import UploadDropzone from './UploadDropzone.tsx'
 
 interface Props {
   item: MenuItem
@@ -18,7 +18,6 @@ export default function ItemRow({ item, onSave, onDelete, onUploadImage, onRemov
   const [available, setAvailable] = useState(item.available)
   const [saved, setSaved] = useState(false)
   const [uploading, setUploading] = useState(false)
-  const fileInput = useRef<HTMLInputElement>(null)
 
   async function save() {
     if (await onSave(item.id, { name, description, price: parseInt(price, 10), available })) {
@@ -32,7 +31,6 @@ export default function ItemRow({ item, onSave, onDelete, onUploadImage, onRemov
     setUploading(true)
     await onUploadImage(item.id, file)
     setUploading(false)
-    if (fileInput.current) fileInput.current.value = '' // permite elegir la misma foto otra vez
   }
 
   return (
@@ -41,22 +39,14 @@ export default function ItemRow({ item, onSave, onDelete, onUploadImage, onRemov
     <div className="my-2 flex flex-col gap-2 rounded-lg border border-line-soft/60 p-3 transition-colors hover:bg-line-soft/40 lg:my-1.5 lg:grid lg:grid-cols-[64px_1.2fr_1.4fr_110px_auto_auto_auto] lg:items-center lg:gap-2 lg:rounded-none lg:border-0 lg:p-0">
       <div className="flex items-center gap-3 lg:contents">
         <div className="flex shrink-0 flex-col items-center gap-1">
-          <button
-            type="button"
-            onClick={() => fileInput.current?.click()}
-            disabled={uploading}
-            className="flex size-14 cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-line bg-[#120e0b] text-2xl text-muted transition-colors hover:border-fire disabled:opacity-50"
-            title={item.imageUrl ? 'Cambiar foto' : 'Agregar foto'}
+          <UploadDropzone
+            imageUrl={item.imageUrl}
+            uploading={uploading}
+            onPick={pickFile}
+            compact
+            className="size-14"
             aria-label={item.imageUrl ? `Cambiar foto de ${item.name}` : `Agregar foto a ${item.name}`}
-          >
-            {uploading ? (
-              <Loader label="Subiendo..." size="sm" />
-            ) : item.imageUrl ? (
-              <img src={item.imageUrl} alt="" className="size-full object-cover" />
-            ) : (
-              '+'
-            )}
-          </button>
+          />
           {item.imageUrl && !uploading && (
             <button
               type="button"
@@ -66,13 +56,6 @@ export default function ItemRow({ item, onSave, onDelete, onUploadImage, onRemov
               Quitar
             </button>
           )}
-          <input
-            ref={fileInput}
-            type="file"
-            accept="image/*"
-            hidden
-            onChange={(e) => pickFile(e.target.files?.[0])}
-          />
         </div>
 
         <input

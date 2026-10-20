@@ -50,13 +50,13 @@ export default function LocationPage() {
                   href={SITE.mapsLink}
                   label={t('locationPage.openInMaps')}
                   logoSrc="/images/logogooglemaps.png"
-                  pillColorClass="bg-[#ea4335]"
+                  pillColorClass="pill-maps"
                 />
                 <MapAppButton
                   href={SITE.wazeLink}
                   label={t('locationPage.openInWaze')}
                   logoSrc="/images/logowaze.png"
-                  pillColorClass="bg-[#33ccff]"
+                  pillColorClass="pill-waze"
                 />
               </div>
             </div>

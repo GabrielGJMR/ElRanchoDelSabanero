@@ -62,7 +62,14 @@
     "loading": "Cargando la carta...",
     "noResults": "No encontramos nada con \"{{query}}\".",
     "photoComingSoon": "Foto de {{name}} (próximamente)",
-    "priceNote": "Los precios no incluyen I.V.A."
+    "priceNote": "Los precios no incluyen I.V.A.",
+    "tabsAria": "Tipos de menú",
+    "tabs": {
+      "principal": "Menú Principal",
+      "casados": "Casados",
+      "desayunos": "Desayunos"
+    },
+    "menuComingSoon": "Todavía no hemos publicado este menú. ¡Vuelva pronto!"
   },
   "eventsPage": {
     "pageTitle": "Eventos",

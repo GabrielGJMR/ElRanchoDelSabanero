@@ -1,5 +1,3 @@
-import './Loader.css'
-
 interface Props {
   /** Para quien usa lector de pantalla (y, si showLabel, se ve escrito debajo del loader). */
   label: string
@@ -10,7 +8,7 @@ interface Props {
   labelClassName?: string
 }
 
-/** Loader de cuatro círculos (ver Loader.css) para cualquier carga desde el backend o internet. */
+/** Loader de cuatro círculos (ver styles/loader.css) para cualquier carga desde el backend o internet. */
 export default function Loader({ label, showLabel = false, size = 'md', className = '', labelClassName = 'text-muted' }: Props) {
   return (
     // <span>, no <div>: el Loader a veces va dentro de un <p> (ej. "Cargando..." en Admin),

@@ -62,7 +62,14 @@
     "loading": "Chargement du menu...",
     "noResults": "Aucun résultat pour \"{{query}}\".",
     "photoComingSoon": "Photo de {{name}} (bientôt disponible)",
-    "priceNote": "Les prix n'incluent pas la TVA."
+    "priceNote": "Les prix n'incluent pas la TVA.",
+    "tabsAria": "Types de menu",
+    "tabs": {
+      "principal": "Menu Principal",
+      "casados": "Casados",
+      "desayunos": "Petit-déjeuner"
+    },
+    "menuComingSoon": "Nous n'avons pas encore publié ce menu. Revenez bientôt !"
   },
   "eventsPage": {
     "pageTitle": "Événements",

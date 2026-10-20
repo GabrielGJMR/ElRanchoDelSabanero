@@ -1,6 +1,7 @@
 package com.ranchosabanero.backend.controller;
 
 import com.ranchosabanero.backend.dto.MenuCategoryResponse;
+import com.ranchosabanero.backend.dto.MenuResponse;
 import com.ranchosabanero.backend.service.MenuService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,6 +30,12 @@ public class MenuController {
     @GetMapping("/menu/{slug}")
     public List<MenuCategoryResponse> menuBySlug(@PathVariable String slug, @RequestParam(defaultValue = "es") String lang) {
         return menuService.publicMenuBySlug(slug, supportedLanguage(lang));
+    }
+
+    /** Los 3 menús de comida (Menú Principal, Casados, Desayunos), para las pestañas de /menu. */
+    @GetMapping("/menus")
+    public List<MenuResponse> menuTypes() {
+        return menuService.publicMenuTypes();
     }
 
     private static String supportedLanguage(String lang) {

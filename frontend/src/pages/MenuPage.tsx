@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { fetchMenu, type Category } from '../lib/api.ts'
+import { fetchMenuBySlug, fetchMenuTypes, type Category, type MenuType } from '../lib/api.ts'
 import Loader from '../components/Loader.tsx'
 import PageHeader from '../components/PageHeader.tsx'
 import PhotoFrame from '../components/PhotoFrame.tsx'
@@ -10,13 +10,33 @@ import { usePageTitle } from '../hooks/usePageTitle.ts'
 export default function MenuPage() {
   const { t, i18n } = useTranslation()
   usePageTitle(t('menuPage.pageTitle'))
+  const [menuTypes, setMenuTypes] = useState<MenuType[] | null>(null)
+  const [selectedSlug, setSelectedSlug] = useState<string | null>(null)
   const [menu, setMenu] = useState<Category[] | null>(null)
   const [failed, setFailed] = useState(false)
   const [query, setQuery] = useState('')
 
+  // La pestaña activa es la que el visitante eligió, o si no ha elegido ninguna, la primera
+  // (Menú Principal) en cuanto se sepa cuáles menús hay.
+  const activeSlug = selectedSlug ?? menuTypes?.[0]?.slug ?? null
+
   useEffect(() => {
     let active = true
-    fetchMenu(i18n.language).then((data) => {
+    fetchMenuTypes().then((types) => {
+      if (active) setMenuTypes(types)
+    }).catch(() => {
+      if (active) setMenuTypes([])
+    })
+    return () => {
+      active = false
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!activeSlug) return
+    let active = true
+    setMenu(null)
+    fetchMenuBySlug(activeSlug, i18n.language).then((data) => {
       if (active) {
         setMenu(data)
         setFailed(false)
@@ -27,7 +47,7 @@ export default function MenuPage() {
     return () => {
       active = false
     }
-  }, [i18n.language])
+  }, [activeSlug, i18n.language])
 
   const q = normalize(query)
   const categories = (menu ?? [])
@@ -42,6 +62,37 @@ export default function MenuPage() {
       <PageHeader title={t('menuPage.title')} subtitle={t('menuPage.subtitle')} />
 
       <div className="paper min-h-[60vh]">
+        {menuTypes && menuTypes.length > 1 && (
+          <div className="border-b border-paper-line bg-paper-2/40">
+            <div
+              role="tablist"
+              aria-label={t('menuPage.tabsAria')}
+              className="mx-auto flex max-w-3xl gap-1 overflow-x-auto px-4"
+            >
+              {menuTypes.map((m) => (
+                <button
+                  key={m.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={m.slug === activeSlug}
+                  onClick={() => {
+                    setSelectedSlug(m.slug)
+                    setQuery('')
+                  }}
+                  className={
+                    'min-h-11 shrink-0 border-b-2 px-4 text-sm font-semibold whitespace-nowrap ' +
+                    (m.slug === activeSlug
+                      ? 'border-brasa text-brasa'
+                      : 'border-transparent text-paper-muted hover:text-paper-ink')
+                  }
+                >
+                  {m.slug ? t(`menuPage.tabs.${m.slug}`, { defaultValue: m.name }) : m.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="sticky top-[65px] z-10 border-b border-paper-line bg-paper/95 backdrop-blur">
           <div className="mx-auto max-w-3xl px-4 py-2.5">
             <div className="relative">
@@ -90,6 +141,9 @@ export default function MenuPage() {
           )}
           {menu && !failed && q && categories.length === 0 && (
             <p className="py-10 text-center text-paper-muted">{t('menuPage.noResults', { query })}</p>
+          )}
+          {menu && !failed && !q && categories.length === 0 && (
+            <p className="py-10 text-center text-paper-muted">{t('menuPage.menuComingSoon')}</p>
           )}
 
           {categories.map((c) => (

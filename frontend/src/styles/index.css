@@ -3,4 +3,6 @@
 @import "./theme.css";
 @import "./base.css";
 @import "./components.css";
+@import "./loader.css";
+@import "./map-app-button.css";
 @import "./animations.css";

@@ -1,4 +1,5 @@
-/* Adaptado de un diseño de Uiverse.io (AbanoubMagdy1): cuatro círculos que escalan y rotan en bloque. */
+/* Adaptado de un diseño de Uiverse.io (AbanoubMagdy1): cuatro círculos que escalan y rotan en bloque.
+   Lo usa Loader.tsx. */
 .loader {
   --dim: 2.5rem;
   width: var(--dim);

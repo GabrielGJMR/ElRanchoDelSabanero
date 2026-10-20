@@ -44,8 +44,10 @@ export default function Admin() {
   const [tab, setTab] = useState<Tab>('menu')
 
   // "Eventos" es un menú más en la base de datos, pero con página pública propia (ver Menu.slug);
-  // no se muestra junto a los menús de comida ni se puede borrar por accidente desde aquí.
-  const foodMenus = menus?.filter((m) => !m.slug) ?? null
+  // no se muestra junto a los menús de comida ni se puede borrar por accidente desde aquí. Los 3
+  // menús de comida (Menú Principal, Casados, Desayunos) también tienen slug propio (para sus
+  // pestañas públicas en /menu), así que lo que los distingue de Eventos es el slug exacto.
+  const foodMenus = menus?.filter((m) => m.slug !== 'eventos') ?? null
   const eventosMenu = menus?.find((m) => m.slug === 'eventos') ?? null
   const eventosMenuId = eventosMenu?.id ?? null
   const selectedMenu = foodMenus?.find((m) => m.id === selectedMenuId) ?? null
@@ -290,7 +292,7 @@ export default function Admin() {
       {auth && (
         <>
           <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-            <span className="inline-flex items-center rounded-full bg-[#120e0b] px-3.5 py-1.5 text-xs text-muted shadow-[inset_2px_4px_8px_rgba(5,5,5,0.45)]">
+            <span className="count-pill inline-flex items-center rounded-full px-3.5 py-1.5 text-xs text-muted">
               {tab === 'menu' && selectedMenu && (categories ? `${categories.length} categorías · ${itemCount} platillos` : LOADING_INLINE)}
               {tab === 'menu' && !selectedMenu && (foodMenus ? `${foodMenus.length} ${foodMenus.length === 1 ? 'menú' : 'menús'}` : LOADING_INLINE)}
               {tab === 'eventos' && (eventosCategories ? `${eventosCategories.length} categorías · ${eventosItemCount} paquetes` : LOADING_INLINE)}

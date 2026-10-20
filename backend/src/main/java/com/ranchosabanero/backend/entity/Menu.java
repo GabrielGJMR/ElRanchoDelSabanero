@@ -21,10 +21,9 @@ public class Menu {
     private String name;
 
     /**
-     * Identificador técnico y estable (p.ej. "eventos"), distinto del nombre visible que el
-     * admin puede cambiar cuando quiera. NULL para los menús genéricos (la carta de comida,
-     * todavía mezclados en un solo listado); solo los menús con slug tienen su propia página
-     * pública (ver MenuController).
+     * Identificador técnico y estable (p.ej. "eventos", "principal"), distinto del nombre
+     * visible que el admin puede cambiar cuando quiera. Un menú nuevo creado desde el admin
+     * nace sin slug y no aparece en /api/menus hasta que se le asigne uno (ver MenuController).
      */
     private String slug;
 

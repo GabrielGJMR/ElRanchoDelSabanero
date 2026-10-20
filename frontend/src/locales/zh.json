@@ -62,7 +62,14 @@
     "loading": "正在加载菜单...",
     "noResults": "没有找到与\"{{query}}\"匹配的内容。",
     "photoComingSoon": "{{name}} 的照片(即将上线)",
-    "priceNote": "价格不含增值税。"
+    "priceNote": "价格不含增值税。",
+    "tabsAria": "菜单类型",
+    "tabs": {
+      "principal": "主菜单",
+      "casados": "Casados",
+      "desayunos": "早餐"
+    },
+    "menuComingSoon": "我们还没有发布这个菜单,请稍后再来查看!"
   },
   "eventsPage": {
     "pageTitle": "活动",

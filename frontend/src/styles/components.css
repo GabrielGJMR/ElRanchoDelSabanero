@@ -63,4 +63,104 @@
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35 0 0 0 0 .25 0 0 0 0 .15 0 0 0 .09 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
     color: var(--color-paper-ink);
   }
+
+  /*
+    Resplandor cálido de marca: un degradado radial que oscurece hacia --color-page, para
+    secciones oscuras. Cada una tiene su propia elipse (posición/tamaño/color), por eso son tres
+    clases y no una sola parametrizada.
+  */
+  .hero-glow {
+    background-image: radial-gradient(ellipse at 80% 100%, #7a2a0c 0%, #2a120a 40%, var(--color-page) 75%);
+  }
+  .closing-glow {
+    background-image: radial-gradient(ellipse at 50% 130%, #4a1d0a 0%, var(--color-page) 70%);
+  }
+  .page-header-glow {
+    background-image: radial-gradient(ellipse at 50% 160%, #5a2210 0%, var(--color-page) 70%);
+  }
+
+  /* Título grande del Inicio: tamaño fluido según el ancho de pantalla. */
+  .hero-title {
+    font-size: clamp(2.75rem, 13vw, 5.5rem);
+    line-height: 1.05;
+  }
+  /* Resplandor cálido detrás del escudo del Inicio (mismo tono que --color-ember). */
+  .logo-glow {
+    filter: drop-shadow(0 0 28px rgba(240, 113, 61, .35));
+  }
+
+  /* Fondo "hundido" oscuro, reutilizado en inputs, insignias y botones circulares. */
+  .well {
+    background-color: var(--color-well);
+  }
+  /* Campo de usuario/clave del login: fondo hundido + sombra interior. */
+  .input-well {
+    background-color: var(--color-well);
+    box-shadow: inset 2px 5px 10px rgba(5, 5, 5, .6);
+  }
+  /* Insignia de conteo en el panel ("3 categorías · 12 platillos"). */
+  .count-pill {
+    background-color: var(--color-well);
+    box-shadow: inset 2px 4px 8px rgba(5, 5, 5, .45);
+  }
+  /* Botón "Borrar": halo suave alrededor del círculo oscuro. */
+  .delete-btn {
+    background-color: var(--color-well);
+    box-shadow: 0 0 20px rgba(0, 0, 0, .25);
+  }
+
+  /* Tarjeta del formulario de login: 25px no es un radio estándar de Tailwind. */
+  .login-card {
+    border-radius: 25px;
+    box-shadow: 0 0 25px rgba(0, 0, 0, .35);
+  }
+  .login-card:hover {
+    scale: 1.02;
+  }
+
+  /* Aviso de error flotante: rojo oscuro, a tono con --color-fire. */
+  .toast {
+    background-color: #3a1410;
+  }
+
+  /* Marco del carrusel de especialidades (resplandor del color --color-brasa). */
+  .specialty-frame {
+    box-shadow: 0 0 40px -15px rgba(184, 56, 15, .5);
+  }
+  /* Flechas del carrusel: legibles sobre cualquier foto de fondo. */
+  .carousel-arrow-glyph {
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, .8));
+  }
+
+  /* Círculo de red social (ver SocialLinks.tsx): arranca sin sombra, aparece al pasar el mouse. */
+  .social-icon {
+    color: #4d4d4d;
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  }
+  .social-icon:hover {
+    box-shadow: 3px 2px 30px rgba(0, 0, 0, .25);
+  }
+  /* Colores de marca de cada red social. */
+  .social-whatsapp {
+    background-color: #128c7e;
+  }
+  .social-facebook {
+    background-color: #3b5998;
+  }
+  .social-instagram {
+    background-image: linear-gradient(45deg, #405de6, #5b51db, #b33ab4, #c135b4, #e1306c, #fd1f1f);
+  }
+
+  /* Pastillas "Abrir en..." (ver MapAppButton.tsx y LocationPage.tsx): color oficial de cada app. */
+  .pill-maps {
+    background-color: #ea4335;
+  }
+  .pill-waze {
+    background-color: #33ccff;
+  }
+  /* Texto de esa pastilla: al pasar el mouse el fondo se vuelve blanco (ver group-hover:bg-white
+     en MapAppButton.tsx), así que el texto pasa a casi transparente en vez de blanco sobre blanco. */
+  .group:hover .map-app-pill-text {
+    color: #00000025;
+  }
 }

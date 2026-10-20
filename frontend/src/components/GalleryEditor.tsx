@@ -1,8 +1,9 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import type { GalleryPhoto, GallerySection } from '../lib/api.ts'
 import AddButton from './AddButton.tsx'
 import DeleteButton from './DeleteButton.tsx'
 import Loader from './Loader.tsx'
+import UploadDropzone from './UploadDropzone.tsx'
 
 interface PhotoGridProps {
   section: GallerySection
@@ -13,14 +14,12 @@ interface PhotoGridProps {
 /** La grilla de fotos de una sola sección: subir no reemplaza, cada foto es independiente. */
 function SectionPhotoGrid({ section, onUpload, onDelete }: PhotoGridProps) {
   const [uploading, setUploading] = useState(false)
-  const fileInput = useRef<HTMLInputElement>(null)
 
   async function pickFile(file: File | undefined) {
     if (!file) return
     setUploading(true)
     await onUpload(section.id, file)
     setUploading(false)
-    if (fileInput.current) fileInput.current.value = ''
   }
 
   return (
@@ -40,16 +39,13 @@ function SectionPhotoGrid({ section, onUpload, onDelete }: PhotoGridProps) {
         </div>
       ))}
 
-      <button
-        type="button"
-        onClick={() => fileInput.current?.click()}
-        disabled={uploading}
-        className="flex aspect-square cursor-pointer items-center justify-center rounded-lg border border-dashed border-line text-2xl text-muted transition-colors hover:border-fire hover:text-fire disabled:opacity-50"
+      <UploadDropzone
+        uploading={uploading}
+        onPick={pickFile}
+        label="Elegí una foto"
+        className="aspect-square"
         aria-label={`Agregar foto a ${section.name}`}
-      >
-        {uploading ? <Loader label="Subiendo..." size="sm" /> : '+'}
-      </button>
-      <input ref={fileInput} type="file" accept="image/*" hidden onChange={(e) => pickFile(e.target.files?.[0])} />
+      />
     </div>
   )
 }

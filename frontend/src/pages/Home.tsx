@@ -17,7 +17,7 @@ export default function Home() {
       <Specialties />
       <Gallery />
 
-      <section className="border-t border-line-soft bg-[radial-gradient(ellipse_at_50%_130%,#4a1d0a_0%,var(--color-page)_70%)] px-4 py-20 text-center">
+      <section className="closing-glow border-t border-line-soft px-4 py-20 text-center">
         <Reveal>
           {/* Adorno: una muesca de rancho, para no dejar el texto solo en tanto espacio. */}
           <div className="mb-5 flex items-center justify-center gap-3 text-gold/50" aria-hidden="true">

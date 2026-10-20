@@ -62,7 +62,14 @@
     "loading": "Loading the menu...",
     "noResults": "We couldn't find anything for \"{{query}}\".",
     "photoComingSoon": "Photo of {{name}} (coming soon)",
-    "priceNote": "Prices do not include tax."
+    "priceNote": "Prices do not include tax.",
+    "tabsAria": "Menu types",
+    "tabs": {
+      "principal": "Main Menu",
+      "casados": "Casados",
+      "desayunos": "Breakfast"
+    },
+    "menuComingSoon": "We haven't published this menu yet. Check back soon!"
   },
   "eventsPage": {
     "pageTitle": "Events",
