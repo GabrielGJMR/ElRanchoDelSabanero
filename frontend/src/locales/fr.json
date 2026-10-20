@@ -41,7 +41,6 @@
     "carouselNext": "Photo suivante"
   },
   "gallery": {
-    "heading": "Voici notre rancho",
     "photoAlt": "Photo du restaurant {{n}}",
     "placeholderAlt": "Espace réservé pour une photo du restaurant",
     "placeholderText": "Photo du restaurant"

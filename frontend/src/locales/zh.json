@@ -41,7 +41,6 @@
     "carouselNext": "下一张照片"
   },
   "gallery": {
-    "heading": "这就是我们的餐厅",
     "photoAlt": "餐厅照片 {{n}}",
     "placeholderAlt": "餐厅照片预留位置",
     "placeholderText": "餐厅照片"

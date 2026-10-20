@@ -41,7 +41,6 @@
     "carouselNext": "Foto siguiente"
   },
   "gallery": {
-    "heading": "Así es el rancho",
     "photoAlt": "Foto del local {{n}}",
     "placeholderAlt": "Espacio reservado para una foto del local",
     "placeholderText": "Foto del local"

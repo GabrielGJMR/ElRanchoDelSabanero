@@ -123,15 +123,6 @@
     background-color: #3a1410;
   }
 
-  /* Marco del carrusel de especialidades (resplandor del color --color-brasa). */
-  .specialty-frame {
-    box-shadow: 0 0 40px -15px rgba(184, 56, 15, .5);
-  }
-  /* Flechas del carrusel: legibles sobre cualquier foto de fondo. */
-  .carousel-arrow-glyph {
-    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, .8));
-  }
-
   /* Círculo de red social (ver SocialLinks.tsx): arranca sin sombra, aparece al pasar el mouse. */
   .social-icon {
     color: #4d4d4d;
