@@ -17,16 +17,14 @@ export default function Home() {
       <Specialties />
       <Gallery />
 
-      <section className="closing-glow border-t border-line-soft px-4 py-20 text-center">
-        <Reveal>
-          {/* Adorno: una muesca de rancho, para no dejar el texto solo en tanto espacio. */}
-          <div className="mb-5 flex items-center justify-center gap-3 text-gold/50" aria-hidden="true">
-            <span className="h-px w-12 bg-current" />
-            <span className="size-1.5 rotate-45 bg-current" />
-            <span className="h-px w-12 bg-current" />
+      <section className="home-visit paper" aria-labelledby="home-visit-title">
+        <Reveal className="mx-auto grid max-w-6xl items-center gap-8 px-5 py-14 sm:px-8 md:grid-cols-[1fr_auto] md:py-20">
+          <div>
+            <p className="mb-3 text-xs font-bold tracking-[.28em] text-brasa uppercase">Liberia · Guanacaste</p>
+            <h2 id="home-visit-title" className="font-script text-4xl leading-tight sm:text-5xl">{t('home.closing')}</h2>
+            <p className="mt-3 max-w-lg text-paper-muted">Un buen plato sabe mejor cuando se comparte. Pase a visitarnos y disfrute el sabor de la casa.</p>
           </div>
-          <p className="font-script text-4xl md:text-5xl">{t('home.closing')}</p>
-          <div className="mt-7 flex flex-wrap justify-center gap-3">
+          <div className="flex flex-wrap gap-3 md:justify-end">
             <LocationButton to="/ubicacion" label={t('home.ctaLocation')} />
             <Link className="btn btn-ghost btn-display" to="/contacto">{t('home.ctaContact')}</Link>
           </div>

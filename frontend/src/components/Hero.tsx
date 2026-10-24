@@ -39,11 +39,11 @@ export default function Hero() {
     // Sin foto todavía: texto a un lado y el escudo del rancho al otro, como una puerta con su sello.
     return (
       <header className="hero-glow overflow-hidden">
-        <div className="mx-auto grid max-w-5xl items-center gap-8 px-4 py-12 sm:gap-10 sm:py-16 md:grid-cols-[1.15fr_.85fr] md:py-20">
+        <div className="mx-auto grid max-w-6xl items-center gap-8 px-4 py-14 sm:gap-10 sm:py-20 md:grid-cols-[1.05fr_.95fr] md:py-24">
           <div className="text-center md:text-left">
             <HeroCopy />
           </div>
-          <div className="relative mx-auto w-40 sm:w-48 md:w-full md:max-w-sm">
+          <div className="relative mx-auto w-56 sm:w-72 md:w-full md:max-w-md">
             <img
               src="/images/logo-mark.png"
               alt={t('hero.logoAlt')}
