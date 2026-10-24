@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
-    List<Category> findAllByOrderByPositionAscIdAsc();
+    List<Category> findAllByMenuIdOrderByPositionAscIdAsc(Long menuId);
 
-    int countByIdNotNull();
+    int countByMenuId(Long menuId);
 }

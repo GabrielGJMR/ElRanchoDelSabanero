@@ -1,0 +1,104 @@
+{
+  "meta": {
+    "homeTagline": "Restaurant à Liberia, Guanacaste"
+  },
+  "nav": {
+    "aria": "Pages du site",
+    "home": "Accueil",
+    "menu": "Menu",
+    "events": "Événements",
+    "location": "Emplacement",
+    "contact": "Contact",
+    "openMenu": "Ouvrir le menu",
+    "closeMenu": "Fermer le menu"
+  },
+  "footer": {
+    "menu": "Menu",
+    "events": "Événements",
+    "location": "Emplacement",
+    "contact": "Contact"
+  },
+  "hero": {
+    "locationTag": "Liberia, Guanacaste",
+    "tagline": "Notre spécialité, c'est de vous rendre heureux.",
+    "description": "Poulet, hamburgers, patacones et plateaux à partager. Chaque plat est servi avec 2 accompagnements au choix.",
+    "ctaMenu": "Voir le menu",
+    "ctaLocation": "Comment venir",
+    "logoAlt": "Blason d'El Rancho del Sabanero"
+  },
+  "specialties": {
+    "heading": "Ce qu'on mange ici",
+    "viewFullMenu": "Voir le menu complet →",
+    "dishes": [
+      { "title": "Plats maison", "text": "Patacones La Burrita, Tayuya et la salade La Patrona." },
+      { "title": "Hamburgers", "text": "Criolla, Juanita, Smash Burger Tajona et la Carreta sin Bueyes." },
+      { "title": "Poulet", "text": "Gordon Blue, filet à l'ail, grillé ou à la plancha, et fajitas classiques ou jalapeño." },
+      { "title": "Plateaux à partager", "text": "El Peón, pour 5 personnes. El Gamonal, pour 8." }
+    ],
+    "carouselLabel": "Photos de nos plats",
+    "carouselGoTo": "Voir la photo {{n}}",
+    "carouselPrev": "Photo précédente",
+    "carouselNext": "Photo suivante"
+  },
+  "gallery": {
+    "photoAlt": "Photo du restaurant {{n}}",
+    "placeholderAlt": "Espace réservé pour une photo du restaurant",
+    "placeholderText": "Photo du restaurant"
+  },
+  "home": {
+    "closing": "On vous attend à Liberia",
+    "ctaLocation": "Comment venir",
+    "ctaContact": "Contact"
+  },
+  "menuPage": {
+    "pageTitle": "Menu",
+    "title": "Menu",
+    "subtitle": "2 accompagnements au choix : salade créole, riz blanc, frites, patacones, yuca frite, légumes sautés ou mini pommes de terre.",
+    "searchPlaceholder": "Rechercher dans le menu (ex. poulet, patacones)",
+    "searchAria": "Rechercher des plats",
+    "categoriesAria": "Catégories du menu",
+    "loadFailed": "Impossible de charger le menu. Veuillez réessayer dans quelques minutes.",
+    "loading": "Chargement du menu...",
+    "noResults": "Aucun résultat pour \"{{query}}\".",
+    "photoComingSoon": "Photo de {{name}} (bientôt disponible)",
+    "priceNote": "Les prix n'incluent pas la TVA.",
+    "tabsAria": "Types de menu",
+    "tabs": {
+      "principal": "Menu Principal",
+      "casados": "Casados",
+      "desayunos": "Petit-déjeuner"
+    },
+    "menuComingSoon": "Nous n'avons pas encore publié ce menu. Revenez bientôt !"
+  },
+  "eventsPage": {
+    "pageTitle": "Événements",
+    "title": "Événements",
+    "subtitle": "Forfaits anniversaire et célébration : structures gonflables, espace et plus. Écrivez-nous pour personnaliser le vôtre.",
+    "searchPlaceholder": "Rechercher un événement (ex. anniversaire, gonflable)",
+    "searchAria": "Rechercher des forfaits d'événements",
+    "categoriesAria": "Catégories d'événements",
+    "loadFailed": "Impossible de charger les informations sur les événements. Veuillez réessayer dans quelques minutes.",
+    "loading": "Chargement des événements...",
+    "empty": "Aucun forfait publié pour le moment. Écrivez-nous pour plus d'informations.",
+    "noResults": "Aucun résultat pour \"{{query}}\".",
+    "photoComingSoon": "Photo de {{name}} (bientôt disponible)",
+    "priceNote": "Les prix peuvent varier selon la taille du groupe. Demandez la disponibilité."
+  },
+  "locationPage": {
+    "pageTitle": "Emplacement",
+    "title": "Emplacement",
+    "mapTitle": "Carte de {{name}}",
+    "openInMaps": "Ouvrir dans Google Maps",
+    "openInWaze": "Ouvrir dans Waze"
+  },
+  "contactPage": {
+    "pageTitle": "Contact",
+    "title": "Contact",
+    "callUs": "Appelez-nous",
+    "whatsappLabel": "WhatsApp",
+    "whatsappCta": "Écrivez-nous un message",
+    "instagramLabel": "Instagram",
+    "facebookLabel": "Facebook",
+    "facebookName": "El Rancho del Sabanero"
+  }
+}

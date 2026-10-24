@@ -1,0 +1,8 @@
+/* Tailwind primero: @theme y @layer de los demás archivos extienden su configuración. */
+@import "./tailwind.css";
+@import "./theme.css";
+@import "./base.css";
+@import "./components.css";
+@import "./loader.css";
+@import "./map-app-button.css";
+@import "./animations.css";

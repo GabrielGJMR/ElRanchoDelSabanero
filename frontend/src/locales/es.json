@@ -1,0 +1,104 @@
+{
+  "meta": {
+    "homeTagline": "Restaurante en Liberia, Guanacaste"
+  },
+  "nav": {
+    "aria": "Páginas del sitio",
+    "home": "Inicio",
+    "menu": "Carta",
+    "events": "Eventos",
+    "location": "Ubicación",
+    "contact": "Contacto",
+    "openMenu": "Abrir menú",
+    "closeMenu": "Cerrar menú"
+  },
+  "footer": {
+    "menu": "Carta",
+    "events": "Eventos",
+    "location": "Ubicación",
+    "contact": "Contacto"
+  },
+  "hero": {
+    "locationTag": "Liberia, Guanacaste",
+    "tagline": "Nuestra especialidad es hacerlos felices.",
+    "description": "Pollo, hamburguesas, patacones y surtidos para compartir. Cada plato viene con 2 acompañamientos a escoger.",
+    "ctaMenu": "Ver la carta",
+    "ctaLocation": "Cómo llegar",
+    "logoAlt": "Escudo de El Rancho del Sabanero"
+  },
+  "specialties": {
+    "heading": "Qué se come aquí",
+    "viewFullMenu": "Ver la carta completa →",
+    "dishes": [
+      { "title": "Platos de la casa", "text": "Patacones La Burrita, Tayuya y la Ensalada La Patrona." },
+      { "title": "Hamburguesas", "text": "Criolla, Juanita, Smash Burger Tajona y la Carreta sin Bueyes." },
+      { "title": "Pollo", "text": "Gordon Blue, filete al ajillo, al grill o a la plancha, y fajitas clásicas o jalapeñas." },
+      { "title": "Surtidos", "text": "El Peón, para 5 personas. El Gamonal, para 8." }
+    ],
+    "carouselLabel": "Fotos de nuestros platillos",
+    "carouselGoTo": "Ver foto {{n}}",
+    "carouselPrev": "Foto anterior",
+    "carouselNext": "Foto siguiente"
+  },
+  "gallery": {
+    "photoAlt": "Foto del local {{n}}",
+    "placeholderAlt": "Espacio reservado para una foto del local",
+    "placeholderText": "Foto del local"
+  },
+  "home": {
+    "closing": "Lo esperamos en Liberia",
+    "ctaLocation": "Cómo llegar",
+    "ctaContact": "Contacto"
+  },
+  "menuPage": {
+    "pageTitle": "La carta",
+    "title": "La carta",
+    "subtitle": "2 acompañamientos a elegir: ensalada criolla, arroz blanco, papas fritas, patacones, yuca frita, vegetales salteados o papas mini.",
+    "searchPlaceholder": "Buscar en la carta (ej. pollo, patacones)",
+    "searchAria": "Buscar platillos",
+    "categoriesAria": "Categorías de la carta",
+    "loadFailed": "No se pudo cargar la carta. Intente de nuevo en unos minutos.",
+    "loading": "Cargando la carta...",
+    "noResults": "No encontramos nada con \"{{query}}\".",
+    "photoComingSoon": "Foto de {{name}} (próximamente)",
+    "priceNote": "Los precios no incluyen I.V.A.",
+    "tabsAria": "Tipos de menú",
+    "tabs": {
+      "principal": "Menú Principal",
+      "casados": "Casados",
+      "desayunos": "Desayunos"
+    },
+    "menuComingSoon": "Todavía no hemos publicado este menú. ¡Vuelva pronto!"
+  },
+  "eventsPage": {
+    "pageTitle": "Eventos",
+    "title": "Eventos",
+    "subtitle": "Paquetes para cumpleaños y celebraciones: inflables, salón y más. Escríbanos para personalizar el suyo.",
+    "searchPlaceholder": "Buscar en eventos (ej. cumpleaños, inflable)",
+    "searchAria": "Buscar paquetes de eventos",
+    "categoriesAria": "Categorías de eventos",
+    "loadFailed": "No se pudo cargar la información de eventos. Intente de nuevo en unos minutos.",
+    "loading": "Cargando eventos...",
+    "empty": "Todavía no hay paquetes publicados. Escríbanos para más información.",
+    "noResults": "No encontramos nada con \"{{query}}\".",
+    "photoComingSoon": "Foto de {{name}} (próximamente)",
+    "priceNote": "Los precios pueden variar según el tamaño del grupo. Consulte disponibilidad."
+  },
+  "locationPage": {
+    "pageTitle": "Ubicación",
+    "title": "Ubicación",
+    "mapTitle": "Mapa de {{name}}",
+    "openInMaps": "Abrir en Google Maps",
+    "openInWaze": "Abrir en Waze"
+  },
+  "contactPage": {
+    "pageTitle": "Contacto",
+    "title": "Contacto",
+    "callUs": "Llámenos",
+    "whatsappLabel": "WhatsApp",
+    "whatsappCta": "Escríbanos un mensaje",
+    "instagramLabel": "Instagram",
+    "facebookLabel": "Facebook",
+    "facebookName": "El Rancho del Sabanero"
+  }
+}

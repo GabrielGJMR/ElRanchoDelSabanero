@@ -1,0 +1,97 @@
+/* Adaptado de un diseño de Uiverse.io (dexter-st): un mapa de papel "doblado" se despliega
+   detrás del botón al pasar el mouse. El logo de la app (Google Maps / Waze) y el color de la
+   pastilla los pone MapAppButton.tsx; aquí solo vive la animación del mapa, que es igual para
+   las dos. --map-land-filter lo fija cada instancia (un id de filtro SVG único por botón). */
+
+.map-app-btn {
+  box-shadow:
+    0 -1px 2px rgba(3, 7, 18, .01),
+    0 -5px 6px rgba(3, 7, 18, .015),
+    0 -12px 12px rgba(3, 7, 18, .02),
+    0 -20px 22px rgba(3, 7, 18, .03),
+    0 -32px 32px rgba(3, 7, 18, .08);
+}
+.map-app-btn:active {
+  scale: 1.02;
+}
+
+/* Logo de la app (Google Maps / Waze) montado sobre la pastilla. */
+.map-app-icon {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .35));
+}
+
+.map-app-btn__container {
+  position: absolute;
+  left: 0;
+  top: 115px;
+  perspective: 120px;
+  transform: perspective(120px) rotateX(35deg) scaleX(0);
+  transform-origin: 3em 0.5em;
+  transition:
+    transform 0.3s ease-in-out,
+    opacity 0.3s ease-in-out;
+  opacity: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.map-app-btn:hover .map-app-btn__container {
+  transform: perspective(100px) rotateX(35deg) scaleX(0.85);
+  opacity: 1;
+}
+
+.map-app-btn__fold {
+  position: absolute;
+  bottom: 100px;
+  width: 120px;
+  height: 200px;
+  background-color: var(--water-color, #b3e3ff);
+  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.13) 0%, transparent 30%);
+  transform-origin: left bottom;
+  -webkit-mask-image: linear-gradient(to top, #fff 0%, #fff 97%, transparent 100%);
+  mask-image: linear-gradient(to top, #fff 0%, #fff 97%, transparent 100%);
+  overflow: hidden;
+}
+
+.map-app-btn__fold::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 200%;
+  background-color: var(--land-color, #ffdd9f);
+  filter: var(--map-land-filter);
+  box-shadow: inset 0 0 48px 24px var(--veg-color, rgba(54, 173, 90, 0.66));
+  z-index: 0;
+}
+
+.map-app-btn__fold::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 10px 16px 3px rgba(0, 0, 0, 0.25);
+  z-index: 1;
+}
+
+.map-app-btn__fold--1 {
+  left: -60px;
+  transform: rotateY(10deg) translateZ(30px);
+}
+.map-app-btn__fold--2 {
+  left: 60px;
+  transform: rotateY(-10deg) translateZ(10px);
+}
+.map-app-btn__fold--3 {
+  left: -169px;
+  transform: rotateY(-15deg) translateZ(-1px);
+}
+.map-app-btn__fold--4 {
+  left: 166px;
+  transform: rotateY(15deg) translateZ(31px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-app-btn__container {
+    transition: none;
+  }
+}

@@ -1,0 +1,28 @@
+/*
+  Dos superficies: carbón (fondo oscuro, como el logo) y papel crema (como la carta impresa).
+  Contrastes revisados: brasa sobre papel 4.8:1, texto atenuado sobre papel 5.4:1, botón con texto blanco 5.3:1.
+*/
+@theme {
+  --color-page: #0e0b09;
+  --color-card: #1b1512;
+  --color-ink: #f5efe6;
+  --color-muted: #b9ab98;
+  --color-gold: #e0b97a;
+  --color-fire: #c23b12;
+  --color-fire-dark: #9e2f0c;
+  --color-ember: #f0713d;
+  --color-line: #3a2d25;
+  --color-line-soft: #2c221c;
+  --color-well: #120e0b;
+
+  --color-paper: #f3e9d8;
+  --color-paper-2: #eadcc4;
+  --color-paper-ink: #2a1d15;
+  --color-paper-muted: #6b5a4b;
+  --color-paper-line: #cdb996;
+  --color-brasa: #b8380f;
+
+  --font-script: 'Playball', cursive;
+  --font-display: 'Playfair Display SC', Georgia, serif;
+  --font-body: 'Karla', system-ui, sans-serif;
+}

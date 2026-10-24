@@ -1,0 +1,27 @@
+{$DOMAIN}, www.{$DOMAIN} {
+	encode gzip
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+	Referrer-Policy "strict-origin-when-cross-origin"
+	Permissions-Policy "camera=(), microphone=(), geolocation=()"
+	-X-Powered-By
+	}
+	request_body {
+		max_size 7MB
+	}
+
+	# La API y las fotos subidas las sirve el backend
+	handle /api/* {
+		reverse_proxy backend:8080
+	}
+
+	handle /uploads/* {
+		reverse_proxy backend:8080
+	}
+
+	# Todo lo demás es la web estática (React), servida por el contenedor frontend
+	handle {
+		reverse_proxy frontend:80
+	}
+}

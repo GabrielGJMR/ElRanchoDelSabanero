@@ -1,0 +1,298 @@
+@layer components {
+  /*
+    Muesca en la esquina inferior izquierda (como un sello o cartel tallado) en vez del
+    rectángulo con bordes redondeados de cualquier plantilla. La sombra sólida (sin
+    difuminar) "levanta" el botón y se aplana al presionarlo, como un botón físico.
+
+    La forma recortada vive en ::before (no en el elemento real) a propósito: clip-path
+    recorta también el outline del :focus-visible, y el botón real es lo que recibe el
+    foco. Así el anillo de foco sale completo, sin que la muesca se lo coma.
+  */
+  .btn {
+    @apply isolate relative inline-flex min-h-11 cursor-pointer items-center justify-center
+      px-6 py-2.5 text-sm font-bold tracking-wider text-white uppercase no-underline
+      transition-transform duration-150 ease-out
+      hover:-translate-y-0.5 active:translate-y-0
+      disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+  .btn::before {
+    content: '';
+    @apply absolute inset-0 -z-10 border-2 border-fire bg-fire
+      shadow-[0_3px_0_0_var(--color-fire-dark)]
+      transition-[background-color,border-color,box-shadow] duration-150 ease-out
+      [clip-path:polygon(0_0,100%_0,100%_100%,12px_100%,0_calc(100%-12px))];
+  }
+  .btn:hover::before {
+    @apply border-fire-dark bg-fire-dark shadow-[0_4px_0_0_var(--color-fire-dark)];
+  }
+  .btn:active::before {
+    @apply shadow-[0_1px_0_0_var(--color-fire-dark)];
+  }
+  .btn:disabled::before {
+    @apply shadow-none;
+  }
+  .btn-ghost {
+    @apply text-ember hover:text-page;
+  }
+  .btn-ghost::before {
+    @apply border-ember bg-transparent shadow-[0_3px_0_0_var(--color-ember)];
+  }
+  .btn-ghost:hover::before {
+    @apply border-ember bg-ember shadow-[0_4px_0_0_var(--color-ember)];
+  }
+  .btn-ghost:active::before {
+    @apply shadow-[0_1px_0_0_var(--color-ember)];
+  }
+  .btn-sm {
+    @apply min-h-9 px-3.5 py-1.5 text-xs;
+  }
+  .btn-sm::before {
+    @apply [clip-path:polygon(0_0,100%_0,100%_100%,8px_100%,0_calc(100%-8px))];
+  }
+  /* Para las llamadas a la acción principales (portada, cierre): usa la misma fuente de los títulos. */
+  .btn-display {
+    @apply font-display text-base font-normal tracking-wide normal-case;
+  }
+  .field {
+    @apply w-full rounded-md border border-line bg-[#120e0b] p-2.5 text-ink placeholder:text-muted/60;
+  }
+
+  /* Papel crema con un grano muy leve, para las secciones "impresas" */
+  .paper {
+    background-color: var(--color-paper);
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35 0 0 0 0 .25 0 0 0 0 .15 0 0 0 .09 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    color: var(--color-paper-ink);
+  }
+
+  /*
+    No las 4 iguales con el color cambiado (eso se ve "generado"): solo el Hero y "Eventos
+    Pasados" brillan con un resplandor; "Nuestros Platillos" y "Nuestra Especialidad" son
+    paneles planos y sobrios, sin gradiente, cada uno con su propio tono base de los dos ya
+    definidos en el tema (--color-page y --color-card). El brillo se siente especial porque
+    no está en todos lados.
+  */
+  .hero-glow {
+    background-image: radial-gradient(ellipse at 80% 100%, #7a2a0c 0%, #2a120a 40%, var(--color-page) 75%);
+  }
+
+  /* "Nuestros Platillos": panel plano, tono --color-card (más claro que --color-page), sin brillo. */
+  .gallery-section {
+    background-color: var(--color-card);
+  }
+  .gallery-kicker {
+    color: #d59b62;
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+  }
+  .gallery-caption { border-left: 2px solid #a6411d; padding: .25rem 0 .25rem 1.25rem; }
+  /* "Eventos Pasados": la otra sección con resplandor, aparte del Hero — tono ladrillo
+     (--color-fire-dark), no naranja vivo, y más contenido para que no domine la página. */
+  .gallery-editorial {
+    background-color: var(--color-page);
+  }
+  .gallery-editorial-1 {
+    background-image: radial-gradient(ellipse at 85% 50%, var(--color-fire-dark) 0%, #3a1309 30%, var(--color-page) 58%);
+  }
+  .gallery-editorial-1.gallery-editorial-reverse {
+    background-image: radial-gradient(ellipse at 15% 50%, var(--color-fire-dark) 0%, #3a1309 30%, var(--color-page) 58%);
+  }
+  .gallery-editorial-2 {
+    background-image: radial-gradient(ellipse at 85% 50%, var(--color-fire-dark) 0%, #3a1309 30%, var(--color-page) 58%);
+  }
+  .gallery-editorial-2.gallery-editorial-reverse {
+    background-image: radial-gradient(ellipse at 15% 50%, var(--color-fire-dark) 0%, #3a1309 30%, var(--color-page) 58%);
+  }
+  .gallery-editorial-3 {
+    background-image: radial-gradient(ellipse at 85% 50%, var(--color-fire-dark) 0%, #3a1309 30%, var(--color-page) 58%);
+  }
+  .gallery-editorial-photo {
+    padding: .55rem;
+    background: #dfcfb4;
+    box-shadow: 0 16px 34px rgba(0, 0, 0, .25);
+  }
+  .gallery-editorial-reverse .gallery-editorial-photo { transform: rotate(1deg); }
+  .gallery-editorial:not(.gallery-editorial-reverse) .gallery-editorial-photo { transform: rotate(-1deg); }
+  .gallery-banner-photo { grid-row: 1; }
+  .gallery-banner-photo > img,
+  .gallery-banner-photo > div { display: block; width: 100%; }
+  .gallery-heading { border-left: 2px solid #a6411d; padding-left: 1.25rem; }
+  .gallery-mosaic > div { border: 5px solid #e4d4b9; box-shadow: 0 8px 22px rgba(0, 0, 0, .24); }
+  .gallery-mosaic > div:first-child { outline: none; }
+  .rancho-story {
+    position: relative;
+    overflow: hidden;
+    color: #f5efe6;
+    background-color: var(--color-page);
+  }
+  .rancho-story::before {
+    position: absolute;
+    inset: 1rem;
+    border: 1px solid rgba(224, 185, 122, .14);
+    content: '';
+    pointer-events: none;
+  }
+  .rancho-story-copy { padding: 1rem; }
+  .rancho-story-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: .65rem;
+    color: #e0b97a;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+  }
+  .rancho-story-kicker span { color: #df7140; }
+  .rancho-story-rule {
+    display: block;
+    width: 4.5rem;
+    height: 2px;
+    margin-top: 1.25rem;
+    background: #bd4a21;
+  }
+  .rancho-story-copy > p:not(.rancho-story-signature) { color: #d3c2ae; }
+  .rancho-story-signature { color: #d99a65; }
+  .rancho-story-photos { min-width: 0; }
+  .rancho-story-featured {
+    position: relative;
+    height: clamp(17rem, 48vw, 30rem);
+    padding: .65rem;
+    background: #e5d3b7;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, .34);
+    transform: rotate(1deg);
+  }
+  .rancho-story-featured > img,
+  .rancho-story-featured > div { height: 100%; width: 100%; }
+  .rancho-photo-stamp {
+    position: absolute;
+    right: -1rem;
+    bottom: 1.25rem;
+    display: grid;
+    width: 4.5rem;
+    height: 4.5rem;
+    place-content: center;
+    border: 1px solid rgba(245, 239, 230, .75);
+    border-radius: 50%;
+    background: #9e3518;
+    color: #fff4e3;
+    font-family: var(--font-display);
+    font-size: .65rem;
+    line-height: 1.3;
+    text-align: center;
+    transform: rotate(-10deg);
+  }
+  /* Mini-polaroids regadas sobre la esquina de la foto principal, chicas de verdad esta vez. */
+  .rancho-story-strip {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    width: auto;
+    margin-top: -3.5rem;
+    margin-left: 1rem;
+  }
+  .rancho-story-strip > div {
+    flex: none;
+    width: 9rem;
+    aspect-ratio: 1;
+    padding: .5rem;
+    background: #efe1c7;
+    border: none;
+    box-shadow: 0 16px 30px rgba(0, 0, 0, .42);
+  }
+  .rancho-story-strip > div:nth-child(1) { transform: rotate(-3deg); }
+  .rancho-story-strip > div:nth-child(2) { margin-top: .6rem; transform: rotate(2deg); }
+  .rancho-story-strip > div:nth-child(3) { margin-top: -.3rem; transform: rotate(-2deg); }
+  .gallery-mosaic > div:first-child {
+    outline: 1px solid rgba(224, 185, 122, .3);
+    outline-offset: 4px;
+  }
+  /* Cierre del Inicio: único tramo claro entre las secciones oscuras de abajo, como un respiro
+     (a tono con la sección "Qué se come aquí" de arriba, misma superficie .paper). */
+  .home-visit .btn-ghost { color: var(--color-brasa); }
+  .home-visit .btn-ghost::before { border-color: var(--color-brasa); box-shadow: 0 3px 0 0 #8a2a0c; }
+  .home-visit .btn-ghost:hover { color: var(--color-paper); }
+  .home-visit .btn-ghost:hover::before { border-color: #8a2a0c; background-color: var(--color-brasa); }
+  .page-header-glow {
+    background-image: radial-gradient(ellipse at 50% 160%, #5a2210 0%, var(--color-page) 70%);
+  }
+
+  /* Título grande del Inicio: tamaño fluido según el ancho de pantalla. */
+  .hero-title {
+    font-size: clamp(2.75rem, 13vw, 5.5rem);
+    line-height: 1.05;
+  }
+  /* Resplandor cálido detrás del escudo del Inicio (mismo tono que --color-ember). */
+  .logo-glow {
+    filter: drop-shadow(0 0 28px rgba(240, 113, 61, .35));
+  }
+
+  /* Fondo "hundido" oscuro, reutilizado en inputs, insignias y botones circulares. */
+  .well {
+    background-color: var(--color-well);
+  }
+  /* Campo de usuario/clave del login: fondo hundido + sombra interior. */
+  .input-well {
+    background-color: var(--color-well);
+    box-shadow: inset 2px 5px 10px rgba(5, 5, 5, .6);
+  }
+  /* Insignia de conteo en el panel ("3 categorías · 12 platillos"). */
+  .count-pill {
+    background-color: var(--color-well);
+    box-shadow: inset 2px 4px 8px rgba(5, 5, 5, .45);
+  }
+  /* Botón "Borrar": halo suave alrededor del círculo oscuro. */
+  .delete-btn {
+    background-color: var(--color-well);
+    box-shadow: 0 0 20px rgba(0, 0, 0, .25);
+  }
+
+  /* Tarjeta del formulario de login: 25px no es un radio estándar de Tailwind. */
+  .login-card {
+    border-radius: 25px;
+    box-shadow: 0 0 25px rgba(0, 0, 0, .35);
+  }
+  .login-card:hover {
+    scale: 1.02;
+  }
+
+  /* Aviso de error flotante: rojo oscuro, a tono con --color-fire. */
+  .toast {
+    background-color: #3a1410;
+  }
+
+  /* Círculo de red social (ver SocialLinks.tsx): arranca sin sombra, aparece al pasar el mouse. */
+  .social-icon {
+    color: #4d4d4d;
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  }
+  .social-icon:hover {
+    box-shadow: 3px 2px 30px rgba(0, 0, 0, .25);
+  }
+  /* Colores de marca de cada red social. */
+  .social-whatsapp {
+    background-color: #128c7e;
+  }
+  .social-facebook {
+    background-color: #3b5998;
+  }
+  .social-instagram {
+    background-image: linear-gradient(45deg, #405de6, #5b51db, #b33ab4, #c135b4, #e1306c, #fd1f1f);
+  }
+
+  /* Pastillas "Abrir en..." (ver MapAppButton.tsx y LocationPage.tsx): color oficial de cada app. */
+  .pill-maps {
+    background-color: #ea4335;
+  }
+  .pill-waze {
+    background-color: #33ccff;
+  }
+  /* Texto de esa pastilla: al pasar el mouse el fondo se vuelve blanco (ver group-hover:bg-white
+     en MapAppButton.tsx), así que el texto pasa a casi transparente en vez de blanco sobre blanco. */
+  .group:hover .map-app-pill-text {
+    color: #00000025;
+  }
+}
