@@ -323,6 +323,16 @@ export default function Admin() {
             <div role="tabpanel">
               {!foodMenus && <p className="py-6 text-sm text-muted">{LOADING_INLINE}</p>}
 
+              {foodMenus && foodMenus.length > 0 && (
+                <Calculator
+                  key={selectedMenu?.id ?? 'none'}
+                  auth={auth}
+                  menus={foodMenus}
+                  currentMenuId={selectedMenu?.id ?? foodMenus[0].id}
+                  currentCategories={selectedMenu ? categories : null}
+                />
+              )}
+
               {foodMenus && !selectedMenu && (
                 <MenuPicker
                   menus={foodMenus}
@@ -335,7 +345,6 @@ export default function Admin() {
 
               {foodMenus && selectedMenu && (
                 <>
-                  {categories && <Calculator menu={categories} />}
                   <MenuCategoriesPanel
                     key={selectedMenu.id}
                     menu={selectedMenu}
