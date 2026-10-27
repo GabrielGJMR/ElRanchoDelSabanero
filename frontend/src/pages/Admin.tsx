@@ -3,6 +3,7 @@ import {
   adminRequest, basicAuth, UnauthorizedError,
   type Category, type CategoryInput, type ItemInput, type MenuItem,
 } from '../api.ts'
+import Calculator from '../components/Calculator.tsx'
 import CategoryEditor from '../components/CategoryEditor.tsx'
 import LoginForm from '../components/LoginForm.tsx'
 
@@ -98,6 +99,8 @@ export default function Admin() {
             <p className="my-3 rounded-lg border border-fire bg-[#3a1410] px-3.5 py-2.5" role="alert">{error}</p>
           )}
           {!menu && <p className="text-sm text-muted">Cargando...</p>}
+
+          {menu && <Calculator menu={menu} />}
 
           {menu?.map((c) => (
             <CategoryEditor
