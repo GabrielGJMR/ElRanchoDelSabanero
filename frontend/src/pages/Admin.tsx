@@ -4,6 +4,7 @@ import {
   type AppUser, type Category, type GalleryPhoto, type GallerySection, type ItemInput, type MenuItem, type MenuType, type Role,
 } from '../lib/api.ts'
 import Brand from '../components/Brand.tsx'
+import Calculator from '../components/Calculator.tsx'
 import GalleryEditor from '../components/GalleryEditor.tsx'
 import Loader from '../components/Loader.tsx'
 import MenuCategoriesPanel from '../components/MenuCategoriesPanel.tsx'
@@ -333,13 +334,16 @@ export default function Admin() {
               )}
 
               {foodMenus && selectedMenu && (
-                <MenuCategoriesPanel
-                  key={selectedMenu.id}
-                  menu={selectedMenu}
-                  categories={categories}
-                  onBack={backToMenus}
-                  {...categoryActions(selectedMenu.id, () => loadMenuCategories(selectedMenu.id), isAdmin)}
-                />
+                <>
+                  {categories && <Calculator menu={categories} />}
+                  <MenuCategoriesPanel
+                    key={selectedMenu.id}
+                    menu={selectedMenu}
+                    categories={categories}
+                    onBack={backToMenus}
+                    {...categoryActions(selectedMenu.id, () => loadMenuCategories(selectedMenu.id), isAdmin)}
+                  />
+                </>
               )}
             </div>
           )}
